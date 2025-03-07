@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src", "test", "data"],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@data/*": ["data/*"],
+      "@models/*": ["src/models/*"],
+      "@services/*": ["src/services/*"],
+      "@data-access/*": ["src/data-access/*"],
+      "@utilities/*": ["src/utilities/*"],
+      "@infrastructure/*": ["src/infrastructure/*"]
+    },
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "types": ["jest", "node"]
+  }
+}
