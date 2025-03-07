@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "outDir": "./dist",
+    "rootDir": ".",
+    "strict": true,
+    "esModuleInterop": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "sourceMap": true,
+    "noEmitOnError": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@data/*": ["data/*"],
+      "@models/*": ["src/models/*"],
+      "@services/*": ["src/services/*"],
+      "@data-access/*": ["src/data-access/*"],
+      "@utilities/*": ["src/utilities/*"],
+      "@infrastructure/*": ["src/infrastructure/*"]
+    },
+    "allowJs": true,
+    "resolveJsonModule": true
+  },
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  },
+  "include": ["src", "test", "data"]
+}
