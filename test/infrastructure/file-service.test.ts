@@ -1,5 +1,10 @@
 import fs from "fs";
 import { FileService } from "@infrastructure/file-service";
+import {
+  createCustomErrorResult,
+  createErrorResult,
+  createSuccessfulResult,
+} from "@/utilities/result-helper";
 
 jest.mock("fs", () => ({
   existsSync: jest.fn(),
@@ -58,11 +63,7 @@ describe("FileService_Test", () => {
       (fs.promises.writeFile as jest.Mock).mockRejectedValue("string error");
 
       const result = await fileService.writeFile(filePath, mockData);
-      expect(result).toEqual({
-        isSuccess: false,
-        hasError: true,
-        errorMessage: "Unknown error occurred",
-      });
+      expect(result).toEqual(createCustomErrorResult("Unknown error occurred"));
     });
 
     test("when write fails with Error type, return error message", async () => {
@@ -73,11 +74,7 @@ describe("FileService_Test", () => {
       (fs.promises.writeFile as jest.Mock).mockRejectedValue(mockError);
 
       const result = await fileService.writeFile(filePath, mockData);
-      expect(result).toEqual({
-        isSuccess: false,
-        hasError: true,
-        errorMessage: mockError.message,
-      });
+      expect(result).toEqual(createErrorResult(mockError));
     });
 
     test("successfully write the file", async () => {
@@ -87,11 +84,7 @@ describe("FileService_Test", () => {
       (fs.promises.writeFile as jest.Mock).mockResolvedValue(undefined);
 
       const result = await fileService.writeFile(filePath, mockData);
-      expect(result).toEqual({
-        isSuccess: true,
-        hasError: false,
-        errorMessage: undefined,
-      });
+      expect(result).toEqual(createSuccessfulResult());
       expect(fs.promises.writeFile).toHaveBeenCalledWith(
         filePath,
         JSON.stringify(mockData)

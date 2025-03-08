@@ -14,6 +14,7 @@ export default {
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
     "^@/(.*)$": "<rootDir>/src/$1",
+    "^@test/(.*)$": "<rootDir>/test/$1",
     "^@data/(.*)$": "<rootDir>/data/$1",
     "^@models/(.*)$": "<rootDir>/src/models/$1",
     "^@services/(.*)$": "<rootDir>/src/services/$1",

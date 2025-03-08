@@ -15,7 +15,7 @@ export class TransactionDA {
     this.fileService = fileService;
   }
 
-  public async getTransactionByAccountID(
+  public async getTransactionsByAccountID(
     accountID: string
   ): Promise<Transaction[] | undefined> {
     if (!accountID) {
@@ -32,7 +32,7 @@ export class TransactionDA {
       !transaction ||
       !transaction.transactionID ||
       !transaction.accountID ||
-      !transaction.transactionDate ||
+      !transaction.date ||
       !transaction.type ||
       transaction.amount === undefined ||
       transaction.amount <= 0

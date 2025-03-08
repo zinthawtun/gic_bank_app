@@ -8,6 +8,7 @@
     "build": "tsc",
     "start": "tsx src/index.ts",
     "test": "jest --coverage",
+    "test:watch": "jest --watch",
     "lint": "eslint . --ext .ts"
   },
   "keywords": [

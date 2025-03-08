@@ -1,5 +1,5 @@
 import { InterestRule } from "@/models/interest";
-import { Result, ValidationError } from "@/models/result";
+import { Result } from "@/models/result";
 import {
   createCustomErrorResult,
   createErrorResult,

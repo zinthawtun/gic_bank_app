@@ -15,6 +15,16 @@ export class AccountDA {
         this.fileService = fileService;
     }
 
+    public async getAccountByID(accountID: string): Promise<Account | undefined> {
+        if (!accountID) {
+            return undefined;
+        }
+
+        const accounts = await this.getAccounts();
+
+        return accounts.find((a) => a.accountID === accountID);
+    }
+
     public async createNewAccount(account: Account): Promise<Result> {
         if (
             !account ||
@@ -22,7 +32,7 @@ export class AccountDA {
             account.balance === undefined ||
             account.balance < 0
         ) {
-            return createCustomErrorResult("Invalid account");
+            return createCustomErrorResult("Invalid operation");
         }
 
         const accounts = await this.getAccounts();
@@ -37,14 +47,26 @@ export class AccountDA {
         return await this.saveAccounts(accounts);
     }
 
-    public async getAccountByID(accountID: string): Promise<Account | undefined> {
-        if (!accountID) {
-            return undefined;
+    public async updateAccount(account: Account): Promise<Result> {
+        if (
+            !account ||
+            !account.accountID ||
+            account.balance === undefined ||
+            account.balance < 0
+        ) {
+            return createCustomErrorResult("Invalid operation");
         }
 
         const accounts = await this.getAccounts();
+        const accountIndex = accounts.findIndex((a) => a.accountID === account.accountID);
 
-        return accounts.find((a) => a.accountID === accountID);
+        if (accountIndex === -1) {
+            return createCustomErrorResult("Account not found");
+        }
+
+        accounts[accountIndex] = account;
+
+        return await this.saveAccounts(accounts);
     }
 
     private async getAccounts(): Promise<Account[]> {
