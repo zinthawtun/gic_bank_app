@@ -26,8 +26,9 @@ export class AccountDA {
         }
 
         const accounts = await this.getAccounts();
+        const accountIDs = new Set(accounts.map((a) => a.accountID));
 
-        if (accounts.find((a) => a.accountID === account.accountID)) {
+        if (accountIDs.has(account.accountID)) {
             return createCustomErrorResult("Account already exists");
         }
 

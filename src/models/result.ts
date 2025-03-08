@@ -3,3 +3,8 @@ export interface Result {
   hasError: boolean;
   errorMessage: string | undefined;
 }
+
+export interface ValidationError {
+  isValid: boolean;
+  errorMessage: string;
+}

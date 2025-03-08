@@ -1,4 +1,4 @@
-import { Result } from "../models/result";
+import { Result, ValidationError } from "../models/result";
 
 export function createSuccessfulResult(): Result {
   return {
@@ -30,3 +30,10 @@ export function createCustomErrorResult(message: string): Result {
     errorMessage: message,
   };
 }
+
+// export function createValidationError(isValid: boolean, errorMessage: string): ValidationError {
+//   return {
+//     isValid: isValid,
+//     errorMessage: errorMessage,
+//   };
+// }
