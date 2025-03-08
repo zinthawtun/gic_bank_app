@@ -15,7 +15,7 @@ export class InterestRuleDA {
     this.fileService = fileService;
   }
 
-  public async createNewInterestRule(
+  public async insertNewInterestRule(
     interestRule: InterestRule
   ): Promise<Result> {
     if (

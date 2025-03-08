@@ -49,7 +49,7 @@ describe("InterestRuleDA_Test", () => {
 
   describe("createNewInterestRule_test", () => {
     test("when interest rule is empty, test should return error", async () => {
-      const result = await interestRuleDA.createNewInterestRule(
+      const result = await interestRuleDA.insertNewInterestRule(
         undefined as any
       );
 
@@ -57,7 +57,7 @@ describe("InterestRuleDA_Test", () => {
     });
 
     test("when ruleID is empty, test should return error", async () => {
-      const result = await interestRuleDA.createNewInterestRule({
+      const result = await interestRuleDA.insertNewInterestRule({
         ruleID: "",
       } as any);
 
@@ -65,7 +65,7 @@ describe("InterestRuleDA_Test", () => {
     });
 
     test("when rate is undefined, test should return error", async () => {
-      const result = await interestRuleDA.createNewInterestRule({
+      const result = await interestRuleDA.insertNewInterestRule({
         ruleID: "rule1",
       } as any);
 
@@ -73,7 +73,7 @@ describe("InterestRuleDA_Test", () => {
     });
 
     test("when rate is negative, test should return error", async () => {
-      const result = await interestRuleDA.createNewInterestRule({
+      const result = await interestRuleDA.insertNewInterestRule({
         ruleID: "rule1",
         rate: -0.01,
       } as any);
@@ -82,7 +82,7 @@ describe("InterestRuleDA_Test", () => {
     });
 
     test("when interest rule date is empty, test should return error", async () => {
-      const result = await interestRuleDA.createNewInterestRule({
+      const result = await interestRuleDA.insertNewInterestRule({
         ruleID: "rule1",
         rate: 0.01,
         date: undefined,
@@ -97,7 +97,7 @@ describe("InterestRuleDA_Test", () => {
         { ruleID: "rule1", rate: 0.01, date: new Date("2024-01-01") },
       ]);
 
-      const result = await interestRuleDA.createNewInterestRule({
+      const result = await interestRuleDA.insertNewInterestRule({
         ruleID: "rule1",
         rate: 0.01,
         date: new Date("2024-01-01"),
@@ -115,7 +115,7 @@ describe("InterestRuleDA_Test", () => {
         date: new Date("2024-01-03"),
       };
       const updatedInterestRules = [...mockInterestRules, newInterestRule];
-      const result = await interestRuleDA.createNewInterestRule(
+      const result = await interestRuleDA.insertNewInterestRule(
         newInterestRule
       );
 

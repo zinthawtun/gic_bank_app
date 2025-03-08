@@ -3,9 +3,7 @@ import { Transaction } from "@/models/transaction";
 import { AccountDA } from "@/data-access/account-da";
 import { TransactionDA } from "@/data-access/transaction-da";
 import { Result } from "@/models/result";
-import {
-  createCustomErrorResult,
-} from "@utilities/result-helper";
+import { createCustomErrorResult } from "@utilities/result-helper";
 
 export class TransactionService {
   private accountDA: AccountDA;
@@ -32,7 +30,7 @@ export class TransactionService {
         return result;
       }
 
-      account = {...newAccount};
+      account = { ...newAccount };
     }
 
     if (transaction.type === "W") {
