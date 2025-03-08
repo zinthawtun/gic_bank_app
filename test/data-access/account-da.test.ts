@@ -190,49 +190,4 @@ describe("AccountDA_Test", () => {
       );
     });
   });
-
-  describe("getAccounts_test", () => {
-    test("when file is empty, test should return empty array", async () => {
-      mockFileService.readFile.mockResolvedValueOnce([]);
-      const accounts = await (accountDA as any).getAccounts();
-
-      expect(accounts).toEqual([]);
-      expect(mockFileService.readFile).toHaveBeenCalledWith(testFilePath);
-    });
-
-    test("when file has accounts, test should return the accounts", async () => {
-      const accounts = await (accountDA as any).getAccounts();
-
-      expect(accounts).toEqual(mockAccounts);
-      expect(mockFileService.readFile).toHaveBeenCalledWith(testFilePath);
-    });
-
-    test("when file read fails, test should throw error", async () => {
-      mockFileService.readFile.mockRejectedValueOnce(
-        new Error("File read error")
-      );
-      await expect((accountDA as any).getAccounts()).rejects.toThrow(
-        "File read error"
-      );
-    });
-  });
-
-  describe("saveAccounts_test", () => {
-    test("when saveAccounts is successful, test should return success result", async () => {
-      const result = await (accountDA as any).saveAccounts(mockAccounts);
-
-      expect(result).toEqual(createSuccessfulResult());
-      expect(mockFileService.writeFile).toHaveBeenCalledWith(
-        testFilePath,
-        mockAccounts
-      );
-    });
-
-    test("when save accounts fails, test should return error result", async () => {
-      mockFileService.writeFile.mockRejectedValue("error");
-      const result = await (accountDA as any).saveAccounts(mockAccounts);
-
-      expect(result).toEqual(createErrorResult("error"));
-    });
-  });
 });

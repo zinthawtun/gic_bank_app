@@ -125,6 +125,18 @@ describe("InterestRuleDA_Test", () => {
         updatedInterestRules
       );
     });
+
+    test("when saving new interest rule fails, test should return error", async () => {
+      mockFileService.writeFile.mockRejectedValue("error");
+
+      const result = await interestRuleDA.insertNewInterestRule({
+        ruleID: "rule7",
+        rate: 0.03,
+        date: new Date("2024-01-09"),
+      });
+
+      expect(result).toEqual(createErrorResult("error"));
+    });
   });
 
   describe("replaceInterestRateByDate_test", () => {
@@ -208,48 +220,6 @@ describe("InterestRuleDA_Test", () => {
 
       expect(result).toEqual(mockInterestRules);
       expect(mockFileService.readFile).toHaveBeenCalledWith(testFilePath);
-    });
-  });
-
-  describe("getInterestRules_test", () => {
-    test("when there are interest rules, test should return the interest rules", async () => {
-      const result = await (interestRuleDA as any).getInterestRules();
-
-      expect(result).toEqual(mockInterestRules);
-      expect(mockFileService.readFile).toHaveBeenCalledWith(testFilePath);
-    });
-
-    test("when there are no interest rules, test should return empty array", async () => {
-      mockFileService.readFile.mockResolvedValue([]);
-
-      const result = await (interestRuleDA as any).getInterestRules();
-
-      expect(result).toEqual([]);
-      expect(mockFileService.readFile).toHaveBeenCalledWith(testFilePath);
-    });
-  });
-
-  describe("saveInterestRules_test", () => {
-    test("when saving interest rules is successful, test should return successful result", async () => {
-      const result = await (interestRuleDA as any).saveInterestRules(
-        mockInterestRules
-      );
-
-      expect(result).toEqual(createSuccessfulResult());
-      expect(mockFileService.writeFile).toHaveBeenCalledWith(
-        testFilePath,
-        mockInterestRules
-      );
-    });
-
-    test("when saving interest rules fails, test should return error result", async () => {
-      mockFileService.writeFile.mockRejectedValue("error");
-
-      const result = await (interestRuleDA as any).saveInterestRules(
-        mockInterestRules
-      );
-
-      expect(result).toEqual(createErrorResult("error"));
     });
   });
 });

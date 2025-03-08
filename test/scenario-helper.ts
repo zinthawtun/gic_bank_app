@@ -1,4 +1,5 @@
 import { Account } from "@/models/account";
+import { InterestRule } from "@/models/interest";
 import { Transaction } from "@/models/transaction";
 
 export function createTransaction(
@@ -17,12 +18,21 @@ export function createTransaction(
   };
 }
 
-export function createAccount(
-  accountID: string,
-  balance: number
-): Account {
+export function createAccount(accountID: string, balance: number): Account {
   return {
     accountID,
-    balance
+    balance,
+  };
+}
+
+export function createInterestRule(
+  ruleID: string,
+  date: Date,
+  rate: number
+): InterestRule {
+  return {
+    ruleID,
+    date,
+    rate,
   };
 }

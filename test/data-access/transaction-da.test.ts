@@ -67,7 +67,9 @@ describe("TransactionDA_Test", () => {
     });
 
     test("when accountID is null, test should return undefined", async () => {
-      const result = await transactionDA.getTransactionsByAccountID(null as any);
+      const result = await transactionDA.getTransactionsByAccountID(
+        null as any
+      );
       expect(result).toBeUndefined();
       expect(mockFileService.readFile).not.toHaveBeenCalled();
     });
@@ -103,30 +105,6 @@ describe("TransactionDA_Test", () => {
       await expect(
         transactionDA.getTransactionsByAccountID("acc1")
       ).rejects.toThrow("File read error");
-    });
-  });
-
-  describe("getTransactions_test", () => {
-    test("when file is empty, test should return empty array", async () => {
-      mockFileService.readFile.mockResolvedValueOnce([]);
-      const transactions = await (transactionDA as any).getTransactions();
-      expect(transactions).toEqual([]);
-      expect(mockFileService.readFile).toHaveBeenCalledWith(testFilePath);
-    });
-
-    test("successfully read all transactions from file", async () => {
-      const transactions = await (transactionDA as any).getTransactions();
-      expect(transactions).toEqual(mockTransactions);
-      expect(mockFileService.readFile).toHaveBeenCalledWith(testFilePath);
-    });
-
-    test("should throw error when file read fails", async () => {
-      mockFileService.readFile.mockRejectedValueOnce(
-        new Error("File read error")
-      );
-      await expect((transactionDA as any).getTransactions()).rejects.toThrow(
-        "File read error"
-      );
     });
   });
 
@@ -188,35 +166,6 @@ describe("TransactionDA_Test", () => {
         testFilePath,
         mockTransactions
       );
-    });
-  });
-
-  describe("saveTransactions_test", () => {
-    test("when file write fails with non-Error type, return unknown error", async () => {
-      mockFileService.writeFile.mockRejectedValueOnce("string error");
-      const result = await (transactionDA as any).saveTransactions(
-        mockTransactions
-      );
-
-      expect(result).toEqual(createCustomErrorResult("Unknown error occurred"));
-    });
-
-    test("when file write fails with Error type, return error message", async () => {
-      const mockError = new Error("File write error");
-      mockFileService.writeFile.mockRejectedValueOnce(mockError);
-      const result = await (transactionDA as any).saveTransactions(
-        mockTransactions
-      );
-
-      expect(result).toEqual(createErrorResult(mockError));
-    });
-
-    test("when file write succeeds, test should return true", async () => {
-      const result = await (transactionDA as any).saveTransactions(
-        mockTransactions
-      );
-
-      expect(result).toEqual(createSuccessfulResult());
     });
   });
 });
