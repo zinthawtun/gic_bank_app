@@ -41,6 +41,13 @@ export class TransactionDA {
     }
 
     const transactions = await this.getTransactions();
+
+    const transactionIDs = new Set(transactions.map((t) => t.transactionID));
+
+    if (transactionIDs.has(transaction.transactionID)) {
+      return createCustomErrorResult("Transaction already exists");
+    }
+
     transactions.push(transaction);
 
     return await this.saveTransactions(transactions);
@@ -53,7 +60,7 @@ export class TransactionDA {
   private async saveTransactions(transactions: Transaction[]): Promise<Result> {
     try {
       await this.fileService.writeFile(transactionFilePath, transactions);
-      
+
       return createSuccessfulResult();
     } catch (error) {
       return createErrorResult(error);

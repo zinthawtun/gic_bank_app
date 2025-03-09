@@ -48,6 +48,34 @@ export class TransactionService {
     }
   }
 
+  public async generateTransactionID(
+    date: Date,
+    accountID: string
+  ): Promise<string> {
+    const transactions = await this.transactionDA.getTransactionsByAccountID(
+      accountID
+    );
+    const transactionIDs = transactions
+      ? transactions.map((t) => t.transactionID)
+      : [];
+
+    let transactionID = `${date.getFullYear()}${(date.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}${date.getDate()}-01`;
+
+    while (transactionIDs.includes(transactionID)) {
+      const previousID = transactionID.split("-")[1];
+      const newID = parseInt(previousID) + 1;
+      transactionID = `${date.getFullYear()}${(date.getMonth() + 1)
+        .toString()
+        .padStart(2, "0")}${date.getDate()}-${newID
+        .toString()
+        .padStart(2, "0")}`;
+    }
+
+    return transactionID;
+  }
+
   private async getAccountByAccountID(
     accountID: string
   ): Promise<Account | undefined> {

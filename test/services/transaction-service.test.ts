@@ -135,7 +135,7 @@ describe("TransactionService_Test", () => {
 
     test("when account is not found, creating account has error and return error", async () => {
       const newTransaction: Transaction = createTransaction(
-        "20240320-01",    
+        "20240320-01",
         new Date("2024-03-20"),
         "Account03",
         "D",
@@ -359,6 +359,186 @@ describe("TransactionService_Test", () => {
       expect(mockAccountDA.updateAccount).toHaveBeenCalledWith(account);
       expect(mockTransactionDA.addTransaction).toHaveBeenCalledWith(
         newTransaction
+      );
+    });
+  });
+
+  describe("generateTransactionID_test", () => {
+    test("when getTransactionsByAccountID returns null, should handle gracefully", async () => {
+      mockTransactionDA.getTransactionsByAccountID.mockResolvedValue(null);
+
+      const result = await transactionService.generateTransactionID(
+        new Date("2024-03-20"),
+        "Account01"
+      );
+
+      expect(result).toBe("20240320-01");
+    });
+
+    test("when getTransactionsByAccountID returns undefined, should handle gracefully", async () => {
+      mockTransactionDA.getTransactionsByAccountID.mockResolvedValue(undefined);
+
+      const result = await transactionService.generateTransactionID(
+        new Date("2024-03-20"),
+        "Account01"
+      );
+
+      expect(result).toBe("20240320-01");
+    });
+
+    test("when account has no transactions, it should return transaction ID", async () => {
+      const newTransaction: Transaction = createTransaction(
+        "20240320-01",
+        new Date("2024-03-20"),
+        "Account01",
+        "W",
+        50
+      );
+
+      const result = await (transactionService as any).generateTransactionID(
+        newTransaction.date,
+        newTransaction.accountID
+      );
+
+      expect(result).toEqual("20240320-01");
+      expect(mockTransactionDA.getTransactionsByAccountID).toHaveBeenCalledWith(
+        newTransaction.accountID
+      );
+    });
+
+    test("when account has transactions, it should return new transaction ID", async () => {
+      const newTransaction: Transaction = createTransaction(
+        "20240320-01",
+        new Date("2024-03-20"),
+        "Account01",
+        "W",
+        50
+      );
+      const transactions: Transaction[] = [
+        createTransaction(
+          "20240320-01",
+          new Date("2024-03-20"),
+          "Account01",
+          "W",
+          50
+        ),
+        createTransaction(
+          "20240320-02",
+          new Date("2024-03-20"),
+          "Account01",
+          "W",
+          50
+        ),
+      ];
+
+      mockTransactionDA.getTransactionsByAccountID.mockResolvedValue(
+        transactions
+      );
+
+      const result = await (transactionService as any).generateTransactionID(
+        newTransaction.date,
+        newTransaction.accountID
+      );
+
+      expect(result).toEqual("20240320-03");
+      expect(mockTransactionDA.getTransactionsByAccountID).toHaveBeenCalledWith(
+        newTransaction.accountID
+      );
+    });
+
+    test("when account has many 2 digits transactions on same date, it should return new transaction ID", async () => {
+      const newTransaction: Transaction = createTransaction(
+        "20240320-01",
+        new Date("2024-03-20"),
+        "Account01",
+        "W",
+        50
+      );
+      const transactions: Transaction[] = [
+        createTransaction(
+          "20240320-01",
+          new Date("2024-03-20"),
+          "Account01",
+          "W",
+          50
+        ),
+        createTransaction(
+          "20240320-02",
+          new Date("2024-03-20"),
+          "Account01",
+          "W",
+          50
+        ),
+        createTransaction(
+          "20240320-03",
+          new Date("2024-03-20"),
+          "Account01",
+          "W",
+          50
+        ),
+        createTransaction(
+          "20240320-04",
+          new Date("2024-03-20"),
+          "Account01",
+          "W",
+          50
+        ),
+        createTransaction(
+          "20240320-05",
+          new Date("2024-03-20"),
+          "Account01",
+          "W",
+          50
+        ),
+        createTransaction(
+          "20240320-06",
+          new Date("2024-03-20"),
+          "Account01",
+          "W",
+          50
+        ),
+        createTransaction(
+          "20240320-07",
+          new Date("2024-03-20"),
+          "Account01",
+          "W",
+          50
+        ),
+        createTransaction(
+          "20240320-08",
+          new Date("2024-03-20"),
+          "Account01",
+          "W",
+          50
+        ),
+        createTransaction(
+          "20240320-09",
+          new Date("2024-03-20"),
+          "Account01",
+          "W",
+          50
+        ),
+        createTransaction(
+          "20240320-10",
+          new Date("2024-03-20"),
+          "Account01",
+          "W",
+          50
+        ),
+      ];
+
+      mockTransactionDA.getTransactionsByAccountID.mockResolvedValue(
+        transactions
+      );
+
+      const result = await (transactionService as any).generateTransactionID(
+        newTransaction.date,
+        newTransaction.accountID
+      );
+
+      expect(result).toEqual("20240320-11");
+      expect(mockTransactionDA.getTransactionsByAccountID).toHaveBeenCalledWith(
+        newTransaction.accountID
       );
     });
   });

@@ -156,10 +156,26 @@ describe("TransactionDA_Test", () => {
       );
     });
 
+    test("when transaction already exists, test should return error message", async () => {
+      const newTransaction = { ...mockTransactions[0] };
+      const result = await transactionDA.addTransaction(newTransaction);
+      const mockError = new Error("Transaction already exists");
+
+      expect(result).toEqual(createErrorResult(mockError));
+      expect(mockFileService.writeFile).not.toHaveBeenCalled();
+    });
+
     test("when file write fails, test should return false", async () => {
       const mockError = new Error("File write error");
       mockFileService.writeFile.mockRejectedValueOnce(mockError);
-      const result = await transactionDA.addTransaction(mockTransactions[0]);
+      const newTransaction: Transaction = {
+        accountID: "Account2",
+        amount: 100,
+        date: new Date("2024-03-22"),
+        transactionID: "20240323-05",
+        type: "D",
+      };
+      const result = await transactionDA.addTransaction(newTransaction);
 
       expect(result).toEqual(createErrorResult(mockError));
       expect(mockFileService.writeFile).toHaveBeenCalledWith(
