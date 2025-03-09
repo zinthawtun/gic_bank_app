@@ -23,12 +23,12 @@ describe("AccountDA_Test", () => {
   const testFilePath = "@data/accounts.json";
   const mockAccounts: Account[] = [
     {
-      accountID: "acc1",
+      accountID: "Account1",
 
       balance: 100,
     },
     {
-      accountID: "acc2",
+      accountID: "Account2",
       balance: 50,
     },
   ];
@@ -61,14 +61,14 @@ describe("AccountDA_Test", () => {
     });
 
     test("when accountID is valid, test should return the account", async () => {
-      const result = await accountDA.getAccountByID("acc1");
+      const result = await accountDA.getAccountByID("Account1");
 
       expect(result).toEqual(mockAccounts[0]);
       expect(mockFileService.readFile).toHaveBeenCalledWith(testFilePath);
     });
 
     test("when accountID is not found, test should return undefined", async () => {
-      const result = await accountDA.getAccountByID("acc3");
+      const result = await accountDA.getAccountByID("Account3");
 
       expect(result).toBeUndefined();
       expect(mockFileService.readFile).toHaveBeenCalledWith(testFilePath);
@@ -90,7 +90,7 @@ describe("AccountDA_Test", () => {
 
     test("when balance is undefined, test should return custom error", async () => {
       const result = await accountDA.createNewAccount({
-        accountID: "acc3",
+        accountID: "Account3",
       } as any);
 
       expect(result).toEqual(createCustomErrorResult("Invalid operation"));
@@ -98,7 +98,7 @@ describe("AccountDA_Test", () => {
 
     test("when balance is negative, test should return custom error", async () => {
       const result = await accountDA.createNewAccount({
-        accountID: "acc3",
+        accountID: "Account3",
         balance: -10,
       } as any);
 
@@ -107,7 +107,7 @@ describe("AccountDA_Test", () => {
 
     test("when account already exists, test should return custom error", async () => {
       const result = await accountDA.createNewAccount({
-        accountID: "acc1",
+        accountID: "Account1",
         balance: 100,
       } as any);
 
@@ -115,7 +115,7 @@ describe("AccountDA_Test", () => {
     });
 
     test("when account is valid, test should have successful result and save the account", async () => {
-      const account: Account = { accountID: "acc4", balance: 100 };
+      const account: Account = { accountID: "Account4", balance: 100 };
       const updatedMockAccounts = [...mockAccounts, account];
       const result = await accountDA.createNewAccount(account);
 
@@ -127,7 +127,7 @@ describe("AccountDA_Test", () => {
     });
 
     test("when save account fails, test should return error result", async () => {
-      const account: Account = { accountID: "acc5", balance: 100 };
+      const account: Account = { accountID: "Account5", balance: 100 };
       mockFileService.writeFile.mockRejectedValue("error");
       const result = await accountDA.createNewAccount(account);
 
@@ -150,7 +150,7 @@ describe("AccountDA_Test", () => {
 
     test("when balance is undefined, test should return error", async () => {
       const result = await accountDA.updateAccount({
-        accountID: "acc3",
+        accountID: "Account3",
       } as any);
 
       expect(result).toEqual(createCustomErrorResult("Invalid operation"));
@@ -158,7 +158,7 @@ describe("AccountDA_Test", () => {
 
     test("when balance is negative, test should return error", async () => {
       const result = await accountDA.updateAccount({
-        accountID: "acc3",
+        accountID: "Account3",
         balance: -10,
       } as Account);
 
@@ -167,7 +167,7 @@ describe("AccountDA_Test", () => {
 
     test("when account is not found, test should return error", async () => {
       const result = await accountDA.updateAccount({
-        accountID: "acc3",
+        accountID: "Account3",
         balance: 100,
       } as Account);
 
@@ -175,7 +175,7 @@ describe("AccountDA_Test", () => {
     });
 
     test("when account is valid, test should have successful result and save the account", async () => {
-      const account: Account = { accountID: "acc1", balance: 500 };
+      const account: Account = { accountID: "Account1", balance: 500 };
       const updatedMockAccounts = [...mockAccounts];
       const mockIndex = updatedMockAccounts.findIndex(
         (a) => a.accountID === account.accountID

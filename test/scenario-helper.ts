@@ -4,8 +4,8 @@ import { Transaction } from "@/models/transaction";
 
 export function createTransaction(
   transactionID: string,
-  accountID: string,
   date: Date,
+  accountID: string,
   type: "D" | "W",
   amount: number
 ): Transaction {

@@ -5,3 +5,9 @@ export interface Transaction {
   type: "D" | "W";
   amount: number;
 }
+
+
+export interface TransactionBalance{
+  transaction: Transaction;
+  balance: number;
+}

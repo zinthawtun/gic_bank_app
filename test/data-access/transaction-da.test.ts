@@ -25,21 +25,21 @@ describe("TransactionDA_Test", () => {
     {
       transactionID: "20240320-01",
       date: new Date("2024-03-20"),
-      accountID: "acc1",
+      accountID: "Account1",
       type: "D",
       amount: 100,
     },
     {
       transactionID: "20240321-01",
       date: new Date("2024-03-21"),
-      accountID: "acc2",
+      accountID: "Account2",
       type: "W",
       amount: 50,
     },
     {
       transactionID: "20240322-01",
       date: new Date("2024-03-22"),
-      accountID: "acc1",
+      accountID: "Account1",
       type: "D",
       amount: 75,
     },
@@ -84,16 +84,16 @@ describe("TransactionDA_Test", () => {
 
     test("when there is no transaction for the accountID, test should return empty array", async () => {
       const expected: Transaction[] = [];
-      const result = await transactionDA.getTransactionsByAccountID("acc3");
+      const result = await transactionDA.getTransactionsByAccountID("Account3");
       expect(result).toEqual(expected);
       expect(mockFileService.readFile).toHaveBeenCalledTimes(1);
     });
 
     test("when accountID is found, test should return the transactions", async () => {
       const expectedMock = mockTransactions.filter(
-        (t) => t.accountID === "acc1"
+        (t) => t.accountID === "Account1"
       );
-      const result = await transactionDA.getTransactionsByAccountID("acc1");
+      const result = await transactionDA.getTransactionsByAccountID("Account1");
       expect(result).toEqual(expectedMock);
       expect(mockFileService.readFile).toHaveBeenCalledTimes(1);
     });
@@ -103,7 +103,7 @@ describe("TransactionDA_Test", () => {
         new Error("File read error")
       );
       await expect(
-        transactionDA.getTransactionsByAccountID("acc1")
+        transactionDA.getTransactionsByAccountID("Account1")
       ).rejects.toThrow("File read error");
     });
   });
@@ -137,7 +137,7 @@ describe("TransactionDA_Test", () => {
 
     test("when transaction is valid, test should return successful message", async () => {
       const newTransaction: Transaction = {
-        accountID: "acc2",
+        accountID: "Account2",
         amount: 100,
         date: new Date("2024-03-22"),
         transactionID: "20240323-02",

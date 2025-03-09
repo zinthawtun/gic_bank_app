@@ -67,8 +67,8 @@ describe("TransactionService_Test", () => {
     test("when account is not found, withdrawal transaction should return error", async () => {
       const newTransaction: Transaction = createTransaction(
         "20240320-01",
-        "Account03",
         new Date("2024-03-20"),
+        "Account03",
         "W",
         100
       );
@@ -82,8 +82,8 @@ describe("TransactionService_Test", () => {
     test("when account is not found, it should create a new account, execute the deposit transaction, and update the account balance", async () => {
       const newTransaction: Transaction = createTransaction(
         "20240320-01",
-        "Account03",
         new Date("2024-03-20"),
+        "Account03",
         "D",
         100
       );
@@ -116,8 +116,8 @@ describe("TransactionService_Test", () => {
     test("when account is not found, new account is created, transaction withdrawal should return error if balance is insufficient", async () => {
       const newTransaction: Transaction = createTransaction(
         "20240320-01",
-        "Account03",
         new Date("2024-03-20"),
+        "Account03",
         "W",
         100
       );
@@ -135,9 +135,9 @@ describe("TransactionService_Test", () => {
 
     test("when account is not found, creating account has error and return error", async () => {
       const newTransaction: Transaction = createTransaction(
-        "20240320-01",
-        "Account03",
+        "20240320-01",    
         new Date("2024-03-20"),
+        "Account03",
         "D",
         100
       );
@@ -156,8 +156,8 @@ describe("TransactionService_Test", () => {
     test("when account is found, withdrawal insufficient amount should return error", async () => {
       const newTransaction: Transaction = createTransaction(
         "20240320-01",
-        "Account01",
         new Date("2024-03-20"),
+        "Account01",
         "W",
         200
       );
@@ -172,8 +172,8 @@ describe("TransactionService_Test", () => {
     test("when account is found, withdrawal sufficient amount should return success", async () => {
       const newTransaction: Transaction = createTransaction(
         "20240320-01",
-        "Account01",
         new Date("2024-03-20"),
+        "Account01",
         "W",
         50
       );
@@ -196,8 +196,8 @@ describe("TransactionService_Test", () => {
     test("when account is found, deposit transaction should return success", async () => {
       const newTransaction: Transaction = createTransaction(
         "20240320-01",
-        "Account01",
         new Date("2024-03-20"),
+        "Account01",
         "D",
         50
       );
@@ -246,8 +246,8 @@ describe("TransactionService_Test", () => {
     test("when transaction is valid, it should return success", async () => {
       const newTransaction: Transaction = createTransaction(
         "20240320-01",
-        "Account01",
         new Date("2024-03-20"),
+        "Account01",
         "W",
         50
       );
@@ -294,8 +294,8 @@ describe("TransactionService_Test", () => {
       const account: Account = createAccount("Account01", 150);
       const newTransaction: Transaction = createTransaction(
         "20240320-01",
-        "Account01",
         new Date("2024-03-20"),
+        "Account01",
         "W",
         200
       );
@@ -317,8 +317,8 @@ describe("TransactionService_Test", () => {
       const account: Account = createAccount("Account01", 150);
       const newTransaction: Transaction = createTransaction(
         "20240320-01",
-        "Account01",
         new Date("2024-03-20"),
+        "Account01",
         "W",
         50
       );
@@ -344,8 +344,8 @@ describe("TransactionService_Test", () => {
       const account: Account = createAccount("Account01", 150);
       const newTransaction: Transaction = createTransaction(
         "20240320-01",
-        "Account01",
         new Date("2024-03-20"),
+        "Account01",
         "W",
         50
       );
