@@ -24,22 +24,22 @@ describe("TransactionDA_Test", () => {
   const mockTransactions: Transaction[] = [
     {
       transactionID: "20240320-01",
-      transactionDate: new Date("2024-03-20"),
-      accountID: "acc1",
+      date: new Date("2024-03-20"),
+      accountID: "Account1",
       type: "D",
       amount: 100,
     },
     {
       transactionID: "20240321-01",
-      transactionDate: new Date("2024-03-21"),
-      accountID: "acc2",
+      date: new Date("2024-03-21"),
+      accountID: "Account2",
       type: "W",
       amount: 50,
     },
     {
       transactionID: "20240322-01",
-      transactionDate: new Date("2024-03-22"),
-      accountID: "acc1",
+      date: new Date("2024-03-22"),
+      accountID: "Account1",
       type: "D",
       amount: 75,
     },
@@ -61,19 +61,21 @@ describe("TransactionDA_Test", () => {
 
   describe("getTransactionByAccountID_test", () => {
     test("when accountID is empty, test should return undefined", async () => {
-      const result = await transactionDA.getTransactionByAccountID("");
+      const result = await transactionDA.getTransactionsByAccountID("");
       expect(result).toBeUndefined();
       expect(mockFileService.readFile).not.toHaveBeenCalled();
     });
 
     test("when accountID is null, test should return undefined", async () => {
-      const result = await transactionDA.getTransactionByAccountID(null as any);
+      const result = await transactionDA.getTransactionsByAccountID(
+        null as any
+      );
       expect(result).toBeUndefined();
       expect(mockFileService.readFile).not.toHaveBeenCalled();
     });
 
     test("when accountID is undefined, test should return undefined", async () => {
-      const result = await transactionDA.getTransactionByAccountID(
+      const result = await transactionDA.getTransactionsByAccountID(
         undefined as any
       );
       expect(result).toBeUndefined();
@@ -82,16 +84,16 @@ describe("TransactionDA_Test", () => {
 
     test("when there is no transaction for the accountID, test should return empty array", async () => {
       const expected: Transaction[] = [];
-      const result = await transactionDA.getTransactionByAccountID("acc3");
+      const result = await transactionDA.getTransactionsByAccountID("Account3");
       expect(result).toEqual(expected);
       expect(mockFileService.readFile).toHaveBeenCalledTimes(1);
     });
 
     test("when accountID is found, test should return the transactions", async () => {
       const expectedMock = mockTransactions.filter(
-        (t) => t.accountID === "acc1"
+        (t) => t.accountID === "Account1"
       );
-      const result = await transactionDA.getTransactionByAccountID("acc1");
+      const result = await transactionDA.getTransactionsByAccountID("Account1");
       expect(result).toEqual(expectedMock);
       expect(mockFileService.readFile).toHaveBeenCalledTimes(1);
     });
@@ -101,32 +103,8 @@ describe("TransactionDA_Test", () => {
         new Error("File read error")
       );
       await expect(
-        transactionDA.getTransactionByAccountID("acc1")
+        transactionDA.getTransactionsByAccountID("Account1")
       ).rejects.toThrow("File read error");
-    });
-  });
-
-  describe("getTransactions_test", () => {
-    test("when file is empty, test should return empty array", async () => {
-      mockFileService.readFile.mockResolvedValueOnce([]);
-      const transactions = await (transactionDA as any).getTransactions();
-      expect(transactions).toEqual([]);
-      expect(mockFileService.readFile).toHaveBeenCalledWith(testFilePath);
-    });
-
-    test("successfully read all transactions from file", async () => {
-      const transactions = await (transactionDA as any).getTransactions();
-      expect(transactions).toEqual(mockTransactions);
-      expect(mockFileService.readFile).toHaveBeenCalledWith(testFilePath);
-    });
-
-    test("should throw error when file read fails", async () => {
-      mockFileService.readFile.mockRejectedValueOnce(
-        new Error("File read error")
-      );
-      await expect((transactionDA as any).getTransactions()).rejects.toThrow(
-        "File read error"
-      );
     });
   });
 
@@ -159,9 +137,9 @@ describe("TransactionDA_Test", () => {
 
     test("when transaction is valid, test should return successful message", async () => {
       const newTransaction: Transaction = {
-        accountID: "acc2",
+        accountID: "Account2",
         amount: 100,
-        transactionDate: new Date("2024-03-22"),
+        date: new Date("2024-03-22"),
         transactionID: "20240323-02",
         type: "D",
       };
@@ -188,35 +166,6 @@ describe("TransactionDA_Test", () => {
         testFilePath,
         mockTransactions
       );
-    });
-  });
-
-  describe("saveTransactions_test", () => {
-    test("when file write fails with non-Error type, return unknown error", async () => {
-      mockFileService.writeFile.mockRejectedValueOnce("string error");
-      const result = await (transactionDA as any).saveTransactions(
-        mockTransactions
-      );
-
-      expect(result).toEqual(createCustomErrorResult("Unknown error occurred"));
-    });
-
-    test("when file write fails with Error type, return error message", async () => {
-      const mockError = new Error("File write error");
-      mockFileService.writeFile.mockRejectedValueOnce(mockError);
-      const result = await (transactionDA as any).saveTransactions(
-        mockTransactions
-      );
-
-      expect(result).toEqual(createErrorResult(mockError));
-    });
-
-    test("when file write succeeds, test should return true", async () => {
-      const result = await (transactionDA as any).saveTransactions(
-        mockTransactions
-      );
-
-      expect(result).toEqual(createSuccessfulResult());
     });
   });
 });

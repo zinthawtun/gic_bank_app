@@ -15,27 +15,6 @@ export class AccountDA {
         this.fileService = fileService;
     }
 
-    public async createNewAccount(account: Account): Promise<Result> {
-        if (
-            !account ||
-            !account.accountID ||
-            account.balance === undefined ||
-            account.balance < 0
-        ) {
-            return createCustomErrorResult("Invalid account");
-        }
-
-        const accounts = await this.getAccounts();
-
-        if (accounts.find((a) => a.accountID === account.accountID)) {
-            return createCustomErrorResult("Account already exists");
-        }
-
-        accounts.push(account);
-
-        return await this.saveAccounts(accounts);
-    }
-
     public async getAccountByID(accountID: string): Promise<Account | undefined> {
         if (!accountID) {
             return undefined;
@@ -44,6 +23,50 @@ export class AccountDA {
         const accounts = await this.getAccounts();
 
         return accounts.find((a) => a.accountID === accountID);
+    }
+
+    public async createNewAccount(account: Account): Promise<Result> {
+        if (
+            !account ||
+            !account.accountID ||
+            account.balance === undefined ||
+            account.balance < 0
+        ) {
+            return createCustomErrorResult("Invalid operation");
+        }
+
+        const accounts = await this.getAccounts();
+        const accountIDs = new Set(accounts.map((a) => a.accountID));
+
+        if (accountIDs.has(account.accountID)) {
+            return createCustomErrorResult("Account already exists");
+        }
+
+        accounts.push(account);
+
+        return await this.saveAccounts(accounts);
+    }
+
+    public async updateAccount(account: Account): Promise<Result> {
+        if (
+            !account ||
+            !account.accountID ||
+            account.balance === undefined ||
+            account.balance < 0
+        ) {
+            return createCustomErrorResult("Invalid operation");
+        }
+
+        const accounts = await this.getAccounts();
+        const accountIndex = accounts.findIndex((a) => a.accountID === account.accountID);
+
+        if (accountIndex === -1) {
+            return createCustomErrorResult("Account not found");
+        }
+
+        accounts[accountIndex] = account;
+
+        return await this.saveAccounts(accounts);
     }
 
     private async getAccounts(): Promise<Account[]> {
