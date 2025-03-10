@@ -244,7 +244,7 @@ describe("handleStatementInputs_Test", () => {
     );
   });
 
-  test("when report service returns result with error, should show error message", async () => {
+  test("when report service returns result with error, return error message", async () => {
     const errorMessage = "Custom error message";
     mockReportService.runReport.mockResolvedValueOnce({
       transactions: [

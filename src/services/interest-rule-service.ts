@@ -1,8 +1,9 @@
-import { InterestRule } from "@/models/interest";
-import { InterestRuleDA } from "@/data-access/interest-rule-da";
-import { Result } from "@/models/result";
+import { InterestRule } from "@models/interest";
+import { InterestRuleDA } from "@data-access/interest-rule-da";
 
-import { createCustomErrorResult } from "@/utilities/result-helper";
+import { Result } from "@models/result";
+
+import { createCustomErrorResult } from "@utilities/result-helper";
 
 export class InterestRuleService {
   private interestRuleDA: InterestRuleDA;

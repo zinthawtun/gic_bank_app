@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "ruleID": "Rule2",
+    "date": "2023-01-01T00:00:00.000Z",
+    "rate": 0.02
+  },
+  {
+    "ruleID": "Rulennnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+    "date": "2024-01-01T00:00:00.000Z",
+    "rate": 1.1
+  }
+]

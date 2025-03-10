@@ -1,8 +1,10 @@
-import { Account } from "@/models/account";
-import { Transaction } from "@/models/transaction";
-import { AccountDA } from "@/data-access/account-da";
-import { TransactionDA } from "@/data-access/transaction-da";
-import { Result } from "@/models/result";
+import { AccountDA } from "@data-access/account-da";
+import { TransactionDA } from "@data-access/transaction-da";
+
+import { Account } from "@models/account";
+import { Transaction } from "@models/transaction";
+import { Result } from "@models/result";
+
 import { createCustomErrorResult } from "@utilities/result-helper";
 
 export class TransactionService {

@@ -1,14 +1,14 @@
-import { Transaction, TransactionBalance } from "@/models/transaction";
-import { AccountStatementResult } from "@/models/result";
-import { InterestRule, AccountInterest } from "@/models/interest";
+import { InterestRuleDA } from "@data-access/interest-rule-da";
+import { TransactionDA } from "@data-access/transaction-da";
+
+import { Transaction, TransactionBalance } from "@models/transaction";
+import { AccountStatementResult } from "@models/result";
+import { InterestRule, AccountInterest } from "@models/interest";
 
 import {
   createCustomErrorResult,
   createSuccessfulResult,
-} from "@/utilities/result-helper";
-
-import { InterestRuleDA } from "@/data-access/interest-rule-da";
-import { TransactionDA } from "@/data-access/transaction-da";
+} from "@utilities/result-helper";
 
 export class ReportService {
   private transactionDA: TransactionDA;

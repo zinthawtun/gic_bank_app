@@ -16,6 +16,7 @@
       "@/*": ["src/*"],
       "@test/*": ["test/*"],
       "@data/*": ["data/*"],
+      "@config/*": ["src/config/*"],
       "@handlers/*": ["src/handlers/*"],
       "@models/*": ["src/models/*"],
       "@services/*": ["src/services/*"],

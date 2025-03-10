@@ -1,11 +1,13 @@
-import { FileService } from "@infrastructure/file-service";
 import { Result } from "@models/result";
 import { Transaction } from "@models/transaction";
+
 import {
   createSuccessfulResult,
   createErrorResult,
   createCustomErrorResult,
 } from "@utilities/result-helper";
+
+import { FileService } from "@infrastructure/file-service";
 
 const transactionFilePath = "@data/transactions.json";
 
@@ -24,7 +26,9 @@ export class TransactionDA {
 
     const transactions = await this.getTransactions();
 
-    return transactions.filter((t) => t.accountID.toLowerCase() === accountID.toLowerCase());
+    return transactions.filter(
+      (t) => t.accountID.toLowerCase() === accountID.toLowerCase()
+    );
   }
 
   public async addTransaction(transaction: Transaction): Promise<Result> {
@@ -54,10 +58,12 @@ export class TransactionDA {
   }
 
   private async getTransactions(): Promise<Transaction[]> {
-    const transactions = await this.fileService.readFile<Transaction[]>(transactionFilePath);
-    return transactions.map(t => ({
+    const transactions = await this.fileService.readFile<Transaction[]>(
+      transactionFilePath
+    );
+    return transactions.map((t) => ({
       ...t,
-      date: new Date(t.date)
+      date: new Date(t.date),
     }));
   }
 

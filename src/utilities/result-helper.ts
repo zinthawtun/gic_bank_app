@@ -1,4 +1,4 @@
-import { Result } from "../models/result";
+import { Result } from "@models/result";
 
 export function createSuccessfulResult(): Result {
   return {

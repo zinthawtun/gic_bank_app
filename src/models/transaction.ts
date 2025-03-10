@@ -6,7 +6,6 @@ export interface Transaction {
   amount: number;
 }
 
-
 export interface TransactionBalance{
   transaction: Transaction;
   balance: number;

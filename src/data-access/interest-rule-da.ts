@@ -1,10 +1,12 @@
-import { InterestRule } from "@/models/interest";
-import { Result } from "@/models/result";
+import { InterestRule } from "@models/interest";
+import { Result } from "@models/result";
+
 import {
   createCustomErrorResult,
   createErrorResult,
   createSuccessfulResult,
-} from "@/utilities/result-helper";
+} from "@utilities/result-helper";
+
 import { FileService } from "@infrastructure/file-service";
 
 const interestRuleFilePath = "@data/interest-rules.json";

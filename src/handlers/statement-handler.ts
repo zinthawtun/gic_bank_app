@@ -1,20 +1,13 @@
 import inquirer from "inquirer";
 import chalk from "chalk";
 
-import { TransactionDA } from "@/data-access/transaction-da";
-import { InterestRuleDA } from "@/data-access/interest-rule-da";
+import { AccountInterest } from "@models/interest";
+import { TransactionBalance } from "@models/transaction";
 
-import { ReportService } from "@/services/report-service";
-import { FileService } from "@/infrastructure/file-service";
-
-import { AccountInterest } from "@/models/interest";
-import { TransactionBalance } from "@/models/transaction";
+import { createReportService } from "@utilities/service-factory-helper";
 
 export const handleStatementInputs = async (): Promise<boolean> => {
-  const reportService = new ReportService(
-    new TransactionDA(new FileService()),
-    new InterestRuleDA(new FileService())
-  );
+  const reportService = createReportService();
 
   while (true) {
     const { input } = await inquirer.prompt<{ input: string }>([
