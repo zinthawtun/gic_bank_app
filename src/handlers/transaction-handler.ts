@@ -5,14 +5,12 @@ import { FileService } from "@/infrastructure/file-service";
 import { TransactionDA } from "@/data-access/transaction-da";
 import { AccountDA } from "@/data-access/account-da";
 import { Transaction } from "@/models/transaction";
-import { Result } from "@/models/result";
 
 export const handleTransactionInputs = async (): Promise<boolean> => {
   const transactionService = new TransactionService(
     new AccountDA(new FileService()),
     new TransactionDA(new FileService())
   );
-  console.log("Enter transaction details:");
 
   while (true) {
     const { input } = await inquirer.prompt<{ input: string }>([
@@ -20,7 +18,7 @@ export const handleTransactionInputs = async (): Promise<boolean> => {
         type: "input",
         name: "input",
         message: chalk.green(
-          "\nEnter transaction <Date> <Account> <Type> <Amount> (or press Enter to go back):\n > "
+          "\nPlease enter transaction details in <Date> <Account> <Type> <Amount>\n (or enter blank to go back to main menu):\n > "
         ),
         theme: { prefix: "" },
       },
@@ -32,20 +30,20 @@ export const handleTransactionInputs = async (): Promise<boolean> => {
 
     const [date, account, type, amount] = input.split(" ");
     if (!date || !account || !type || !amount) {
-      console.log("Invalid transaction input");
+      console.log(chalk.red("Invalid transaction input"));
       continue;
     }
 
     if (!/^\d{8}$/.test(date)) {
-      console.log("Invalid date format. Use YYYYMMdd");
+      console.log(chalk.red("Invalid date format. Use YYYYMMdd"));
       continue;
     }
 
     const year = parseInt(date.substring(0, 4));
     const month = parseInt(date.substring(4, 6)) - 1;
     const day = parseInt(date.substring(6, 8));
-    const transactionDate = new Date(year, month, day);
-    const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
+    const transactionDate = new Date(Date.UTC(year, month, day));
+    const lastDayOfMonth = new Date(Date.UTC(year, month + 1, 0)).getDate();
 
     if (
       isNaN(transactionDate.getTime()) ||
@@ -54,35 +52,35 @@ export const handleTransactionInputs = async (): Promise<boolean> => {
       month < 0 ||
       month > 11
     ) {
-      console.log("Invalid date");
+      console.log(chalk.red("Invalid date"));
       continue;
     }
 
     if (type !== "D" && type !== "W") {
       console.log(
-        "Invalid transaction type. Valid types are 'D' for Deposit or 'W' for Withdrawal."
+        chalk.red("Invalid transaction type. Valid types are 'D' for Deposit or 'W' for Withdrawal.")
       );
       continue;
     }
 
     const parsedAmount = parseFloat(amount);
     if (isNaN(parsedAmount)) {
-      console.log("Invalid amount");
+      console.log(chalk.red("Invalid amount"));
       continue;
     }
 
     if (!/^\d+(\.\d{0,2})?$/.test(amount)) {
-      console.log("Amount can have up to 2 decimal places");
+      console.log(chalk.red("Amount can have up to 2 decimal places"));
       continue;
     }
 
     if (parsedAmount <= 0) {
-      console.log("Amount must be greater than 0");
+      console.log(chalk.red("Amount must be greater than 0"));
       continue;
     }
 
     if (parsedAmount > 1000000) {
-      console.log("Amount must not exceed 1,000,000");
+      console.log(chalk.red("Amount must not exceed 1,000,000"));
       continue;
     }
 
@@ -101,19 +99,14 @@ export const handleTransactionInputs = async (): Promise<boolean> => {
 
       const result = await transactionService.process(transaction);
       if (!result.hasError) {
-        console.log("Transaction successful");
+        console.log(chalk.green("Transaction successful!"));
         return true;
       }
       console.log(result.errorMessage);
       continue;
     } catch (error) {
-      if (error instanceof Error) {
-        console.log(error.message);
-      } else if ((error as Result).errorMessage) {
-        console.log((error as Result).errorMessage);
-      } else {
-        console.log("Processing failed");
-      }
+      console.log(chalk.red(error));
+      console.log(chalk.red("Failed to process transaction!"));
       continue;
     }
   }

@@ -1,5 +1,6 @@
 import { handleTransactionInputs } from "@handlers/transaction-handler";
 import inquirer from "inquirer";
+import chalk from "chalk";
 
 jest.mock("inquirer");
 jest.mock("chalk", () => ({
@@ -34,10 +35,9 @@ describe("handleTransactionInputs_Test", () => {
 
   test("when input is empty, should exit", async () => {
     mockInquirer.prompt.mockResolvedValueOnce({ input: "" });
-
+    
     const result = await handleTransactionInputs();
 
-    expect(mockConsoleLog).toHaveBeenCalledWith("Enter transaction details:");
     expect(result).toBe(true);
   });
 
@@ -48,6 +48,7 @@ describe("handleTransactionInputs_Test", () => {
 
     const result = await handleTransactionInputs();
 
+    expect(chalk.red).toHaveBeenCalledWith("Invalid transaction input");
     expect(mockConsoleLog).toHaveBeenCalledWith("Invalid transaction input");
     expect(result).toBe(true);
   });
@@ -59,9 +60,8 @@ describe("handleTransactionInputs_Test", () => {
 
     await handleTransactionInputs();
 
-    expect(mockConsoleLog).toHaveBeenCalledWith(
-      "Invalid date format. Use YYYYMMdd"
-    );
+    expect(chalk.red).toHaveBeenCalledWith("Invalid date format. Use YYYYMMdd");
+    expect(mockConsoleLog).toHaveBeenCalledWith("Invalid date format. Use YYYYMMdd");
   });
 
   test("when date is over the end of month, should show error ", async () => {
@@ -71,6 +71,7 @@ describe("handleTransactionInputs_Test", () => {
 
     await handleTransactionInputs();
 
+    expect(chalk.red).toHaveBeenCalledWith("Invalid date");
     expect(mockConsoleLog).toHaveBeenCalledWith("Invalid date");
   });
 
@@ -81,9 +82,9 @@ describe("handleTransactionInputs_Test", () => {
 
     await handleTransactionInputs();
 
-    expect(mockConsoleLog).toHaveBeenCalledWith(
-      "Invalid transaction type. Valid types are 'D' for Deposit or 'W' for Withdrawal."
-    );
+    const errorMessage = "Invalid transaction type. Valid types are 'D' for Deposit or 'W' for Withdrawal.";
+    expect(chalk.red).toHaveBeenCalledWith(errorMessage);
+    expect(mockConsoleLog).toHaveBeenCalledWith(errorMessage);
   });
 
   test("when amount is not a number, should show error", async () => {
@@ -93,6 +94,7 @@ describe("handleTransactionInputs_Test", () => {
 
     await handleTransactionInputs();
 
+    expect(chalk.red).toHaveBeenCalledWith("Invalid amount");
     expect(mockConsoleLog).toHaveBeenCalledWith("Invalid amount");
   });
 
@@ -103,9 +105,8 @@ describe("handleTransactionInputs_Test", () => {
 
     await handleTransactionInputs();
 
-    expect(mockConsoleLog).toHaveBeenCalledWith(
-      "Amount must be greater than 0"
-    );
+    expect(chalk.red).toHaveBeenCalledWith("Amount must be greater than 0");
+    expect(mockConsoleLog).toHaveBeenCalledWith("Amount must be greater than 0");
   });
 
   test("when amount exceeds limit, should show error", async () => {
@@ -115,9 +116,8 @@ describe("handleTransactionInputs_Test", () => {
 
     await handleTransactionInputs();
 
-    expect(mockConsoleLog).toHaveBeenCalledWith(
-      "Amount must not exceed 1,000,000"
-    );
+    expect(chalk.red).toHaveBeenCalledWith("Amount must not exceed 1,000,000");
+    expect(mockConsoleLog).toHaveBeenCalledWith("Amount must not exceed 1,000,000");
   });
 
   test("when amount has more than 2 decimal places, should show error", async () => {
@@ -127,9 +127,8 @@ describe("handleTransactionInputs_Test", () => {
 
     await handleTransactionInputs();
 
-    expect(mockConsoleLog).toHaveBeenCalledWith(
-      "Amount can have up to 2 decimal places"
-    );
+    expect(chalk.red).toHaveBeenCalledWith("Amount can have up to 2 decimal places");
+    expect(mockConsoleLog).toHaveBeenCalledWith("Amount can have up to 2 decimal places");
   });
 
   test("when transaction processing throws Result error, should show error message", async () => {
@@ -146,7 +145,10 @@ describe("handleTransactionInputs_Test", () => {
 
     await handleTransactionInputs();
 
-    expect(mockConsoleLog).toHaveBeenCalledWith("Result error message");
+    expect(chalk.red).toHaveBeenCalledWith({"errorMessage": "Result error message"});
+    expect(mockConsoleLog).toHaveBeenCalledWith({"errorMessage": "Result error message"});
+    expect(chalk.red).toHaveBeenCalledWith("Failed to process transaction!");
+    expect(mockConsoleLog).toHaveBeenCalledWith("Failed to process transaction!");
   });
 
   test("when transaction processing throws Error object, should show error message", async () => {
@@ -163,7 +165,11 @@ describe("handleTransactionInputs_Test", () => {
 
     await handleTransactionInputs();
 
-    expect(mockConsoleLog).toHaveBeenCalledWith("Custom error message");
+    const error = new Error("Custom error message");
+    expect(chalk.red).toHaveBeenCalledWith(error);
+    expect(mockConsoleLog).toHaveBeenCalledWith(error);
+    expect(chalk.red).toHaveBeenCalledWith("Failed to process transaction!");
+    expect(mockConsoleLog).toHaveBeenCalledWith("Failed to process transaction!");
   });
 
   test("when transaction processing throws unknown error type, should show generic message", async () => {
@@ -178,7 +184,10 @@ describe("handleTransactionInputs_Test", () => {
 
     await handleTransactionInputs();
 
-    expect(mockConsoleLog).toHaveBeenCalledWith("Processing failed");
+    expect(chalk.red).toHaveBeenCalledWith("Unknown error");
+    expect(mockConsoleLog).toHaveBeenCalledWith("Unknown error");
+    expect(chalk.red).toHaveBeenCalledWith("Failed to process transaction!");
+    expect(mockConsoleLog).toHaveBeenCalledWith("Failed to process transaction!");
   });
 
   test("when transaction processing returns with error, should show error message and continue", async () => {
@@ -208,6 +217,7 @@ describe("handleTransactionInputs_Test", () => {
       type: "W",
       amount: 100,
     });
+
     expect(mockConsoleLog).toHaveBeenCalledWith("Insufficient funds");
     expect(result).toBe(true);
   });
@@ -236,7 +246,8 @@ describe("handleTransactionInputs_Test", () => {
       type: "D",
       amount: 100,
     });
-    expect(mockConsoleLog).toHaveBeenCalledWith("Transaction successful");
+    expect(chalk.green).toHaveBeenCalledWith("Transaction successful!");
+    expect(mockConsoleLog).toHaveBeenCalledWith("Transaction successful!");
     expect(result).toBe(true);
   });
 });
