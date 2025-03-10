@@ -1,16 +1,1 @@
-[
-  {
-    "transactionID": "20230626-01",
-    "date": "2023-06-26T00:00:00.000Z",
-    "accountID": "AC001",
-    "type": "D",
-    "amount": 100
-  },
-  {
-    "transactionID": "20230626-02",
-    "date": "2023-06-26T00:00:00.000Z",
-    "accountID": "AC001",
-    "type": "D",
-    "amount": 100
-  }
-]
+[]

@@ -1,19 +1,18 @@
-import { Account } from "@/models/account";
-import { Transaction } from "@/models/transaction";
 import { AccountDA } from "@data-access/account-da";
 import { TransactionDA } from "@data-access/transaction-da";
+
+import { Account } from "@models/account";
+import { Transaction } from "@models/transaction";
 
 import {
   createCustomErrorResult,
   createErrorResult,
   createSuccessfulResult,
 } from "@utilities/result-helper";
-
-import { TransactionService } from "@/services/transaction-service";
-
-import { FileService } from "@/infrastructure/file-service";
-
 import { createAccount, createTransaction } from "@test/scenario-helper";
+
+import { TransactionService } from "@services/transaction-service";
+import { FileService } from "@infrastructure/file-service";
 
 const mockAccountDA = {
   getAccountByID: jest.fn(),
@@ -28,7 +27,6 @@ const mockTransactionDA = {
 jest.mock("@data-access/account-da", () => ({
   AccountDA: jest.fn().mockImplementation(() => mockAccountDA),
 }));
-
 jest.mock("@data-access/transaction-da", () => ({
   TransactionDA: jest.fn().mockImplementation(() => mockTransactionDA),
 }));
@@ -36,14 +34,8 @@ jest.mock("@data-access/transaction-da", () => ({
 describe("TransactionService_Test", () => {
   let transactionService: TransactionService;
   const mockAccounts: Account[] = [
-    {
-      accountID: "Account01",
-      balance: 100,
-    },
-    {
-      accountID: "Account02",
-      balance: 200,
-    },
+    createAccount("Account01", 100),
+    createAccount("Account02", 200),
   ];
 
   beforeEach(() => {

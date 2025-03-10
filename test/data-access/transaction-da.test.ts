@@ -1,48 +1,50 @@
-import { Transaction } from "@models/transaction";
 import { TransactionDA } from "@data-access/transaction-da";
-import { FileService } from "@infrastructure/file-service";
+
+import { Transaction } from "@models/transaction";
+
 import {
   createSuccessfulResult,
-  createCustomErrorResult,
   createErrorResult,
 } from "@utilities/result-helper";
+
+import { FileService } from "@infrastructure/file-service";
+import { createTransaction } from "@test/scenario-helper";
 
 const mockFileService = {
   readFile: jest.fn(),
   writeFile: jest.fn(),
 };
+const mockConsoleLog = jest.spyOn(console, "log").mockImplementation();
 
 jest.mock("@infrastructure/file-service", () => ({
   FileService: jest.fn().mockImplementation(() => mockFileService),
 }));
 
-const mockConsoleLog = jest.spyOn(console, "log").mockImplementation();
-
 describe("TransactionDA_Test", () => {
   let transactionDA: TransactionDA;
   const testFilePath = "@data/transactions.json";
   const mockTransactions: Transaction[] = [
-    {
-      transactionID: "20240320-01",
-      date: new Date("2024-03-20"),
-      accountID: "Account1",
-      type: "D",
-      amount: 100,
-    },
-    {
-      transactionID: "20240321-01",
-      date: new Date("2024-03-21"),
-      accountID: "Account2",
-      type: "W",
-      amount: 50,
-    },
-    {
-      transactionID: "20240322-01",
-      date: new Date("2024-03-22"),
-      accountID: "Account1",
-      type: "D",
-      amount: 75,
-    },
+    createTransaction(
+      "20240320-01",
+      new Date("2024-03-20"),
+      "Account1",
+      "D",
+      100
+    ),
+    createTransaction(
+      "20240321-01",
+      new Date("2024-03-21"),
+      "Account2",
+      "W",
+      50
+    ),
+    createTransaction(
+      "20240322-01",
+      new Date("2024-03-22"),
+      "Account1",
+      "D",
+      75
+    ),
   ];
 
   beforeEach(() => {
@@ -148,7 +150,7 @@ describe("TransactionDA_Test", () => {
     });
 
     test("when transaction already exists, test should return error message", async () => {
-      const newTransaction = { ...mockTransactions[0]};
+      const newTransaction = { ...mockTransactions[0] };
       const result = await transactionDA.addTransaction(newTransaction);
       const mockError = new Error("Transaction already exists");
 
@@ -170,10 +172,10 @@ describe("TransactionDA_Test", () => {
       const result = await transactionDA.addTransaction(newTransaction);
 
       expect(result).toEqual(createErrorResult(mockError));
-      expect(mockFileService.writeFile).toHaveBeenCalledWith(
-        testFilePath,
-        [...mockTransactions, newTransaction]
-      );
+      expect(mockFileService.writeFile).toHaveBeenCalledWith(testFilePath, [
+        ...mockTransactions,
+        newTransaction,
+      ]);
     });
   });
 });

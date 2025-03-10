@@ -1,5 +1,7 @@
-import { InterestRule } from "@models/interest";
 import { InterestRuleDA } from "@data-access/interest-rule-da";
+
+import { InterestRule } from "@models/interest";
+
 import { FileService } from "@infrastructure/file-service";
 
 import {
@@ -12,12 +14,11 @@ const mockFileService = {
   readFile: jest.fn(),
   writeFile: jest.fn(),
 };
+const mockConsoleLog = jest.spyOn(console, "log").mockImplementation();
 
 jest.mock("@infrastructure/file-service", () => ({
   FileService: jest.fn().mockImplementation(() => mockFileService),
 }));
-
-const mockConsoleLog = jest.spyOn(console, "log").mockImplementation();
 
 describe("InterestRuleDA_Test", () => {
   let interestRuleDA: InterestRuleDA;
@@ -115,14 +116,16 @@ describe("InterestRuleDA_Test", () => {
         date: new Date("2024-01-03"),
       };
       const updatedInterestRules = [...mockInterestRules, newInterestRule];
-      const updatedRules = updatedInterestRules.map(rule => ({
+      const updatedRules = updatedInterestRules.map((rule) => ({
         ...rule,
-        date: rule.date.toISOString()
+        date: rule.date.toISOString(),
       }));
 
       mockFileService.readFile.mockResolvedValue(mockInterestRules);
 
-      const result = await interestRuleDA.insertNewInterestRule(newInterestRule);
+      const result = await interestRuleDA.insertNewInterestRule(
+        newInterestRule
+      );
 
       expect(result).toEqual(createSuccessfulResult());
       expect(mockFileService.writeFile).toHaveBeenCalledWith(
@@ -235,15 +238,15 @@ describe("InterestRuleDA_Test", () => {
         {
           ruleID: "Rule01",
           date: dateObj,
-          rate: 0.05
-        }
+          rate: 0.05,
+        },
       ];
-      
+
       mockFileService.writeFile.mockResolvedValue(undefined);
-      
+
       const interestRuleDA = new InterestRuleDA(new FileService());
       const result = await (interestRuleDA as any).saveInterestRules(rules);
-      
+
       expect(result).toEqual(createSuccessfulResult());
       expect(mockFileService.writeFile).toHaveBeenCalledWith(
         testFilePath,
@@ -251,8 +254,8 @@ describe("InterestRuleDA_Test", () => {
           expect.objectContaining({
             ruleID: "Rule01",
             date: dateObj.toISOString(),
-            rate: 0.05
-          })
+            rate: 0.05,
+          }),
         ])
       );
     });
@@ -263,15 +266,15 @@ describe("InterestRuleDA_Test", () => {
         {
           ruleID: "Rule01",
           date: isoString as any,
-          rate: 0.05
-        }
+          rate: 0.05,
+        },
       ];
-      
+
       mockFileService.writeFile.mockResolvedValue(undefined);
-      
+
       const interestRuleDA = new InterestRuleDA(new FileService());
       const result = await (interestRuleDA as any).saveInterestRules(rules);
-      
+
       expect(result).toEqual(createSuccessfulResult());
       expect(mockFileService.writeFile).toHaveBeenCalledWith(
         testFilePath,
@@ -279,8 +282,8 @@ describe("InterestRuleDA_Test", () => {
           expect.objectContaining({
             ruleID: "Rule01",
             date: isoString,
-            rate: 0.05
-          })
+            rate: 0.05,
+          }),
         ])
       );
     });

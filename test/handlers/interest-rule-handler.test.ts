@@ -1,22 +1,21 @@
-import { handleInterestInputs } from "@handlers/interest-rule-handler";
 import inquirer from "inquirer";
 import chalk from "chalk";
 
-import { ValidationMessages } from "@/config/constants";
+import { ValidationMessages } from "@config/constants";
+
+import { handleInterestInputs } from "@handlers/interest-rule-handler";
+
+const mockInquirer = inquirer as jest.Mocked<typeof inquirer>;
+const mockInterestRuleService = {
+  createNewInterestRule: jest.fn(),
+};
+let mockConsoleLog: jest.SpyInstance;
 
 jest.mock("inquirer");
 jest.mock("chalk", () => ({
   red: jest.fn((str) => str),
   green: jest.fn((str) => str),
 }));
-
-const mockInquirer = inquirer as jest.Mocked<typeof inquirer>;
-let mockConsoleLog: jest.SpyInstance;
-
-const mockInterestRuleService = {
-  createNewInterestRule: jest.fn(),
-};
-
 jest.mock("@services/interest-rule-service", () => ({
   InterestRuleService: jest
     .fn()

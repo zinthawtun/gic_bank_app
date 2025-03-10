@@ -1,37 +1,29 @@
-import { InterestRule } from "@/models/interest";
-import { InterestRuleDA } from "@/data-access/interest-rule-da";
+import { InterestRuleDA } from "@data-access/interest-rule-da";
+
+import { InterestRule } from "@models/interest";
 
 import { createCustomErrorResult } from "@/utilities/result-helper";
+import { createInterestRule } from "@test/scenario-helper";
 
 import { InterestRuleService } from "@/services/interest-rule-service";
 import { FileService } from "@/infrastructure/file-service";
-import { createInterestRule } from "@test/scenario-helper";
 
 const mockInterestRuleDA = {
   insertNewInterestRule: jest.fn(),
   getAllInterestRules: jest.fn(),
   replaceInterestRule: jest.fn(),
 };
+const mockConsoleLog = jest.spyOn(console, "log").mockImplementation();
 
-jest.mock("@/data-access/interest-rule-da", () => ({
+jest.mock("@data-access/interest-rule-da", () => ({
   InterestRuleDA: jest.fn().mockImplementation(() => mockInterestRuleDA),
 }));
-
-const mockConsoleLog = jest.spyOn(console, "log").mockImplementation();
 
 describe("InterestRuleService_Test", () => {
   let interestRuleService: InterestRuleService;
   let mockInterestRules: InterestRule[] = [
-    {
-      ruleID: "rule1",
-      date: new Date("2024-01-01"),
-      rate: 0.01,
-    },
-    {
-      ruleID: "rule2",
-      date: new Date("2024-01-02"),
-      rate: 0.02,
-    },
+    createInterestRule("rule1", new Date("2024-01-01"), 0.01),
+    createInterestRule("rule2", new Date("2024-01-02"), 0.02),
   ];
 
   beforeEach(() => {

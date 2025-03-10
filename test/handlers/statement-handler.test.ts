@@ -1,8 +1,17 @@
-import { handleStatementInputs } from "@handlers/statement-handler";
 import inquirer from "inquirer";
 import chalk from "chalk";
+
 import { createTransaction } from "@test/scenario-helper";
 import { createCustomErrorResult } from "@/utilities/result-helper";
+
+import { handleStatementInputs } from "@handlers/statement-handler";
+
+const mockInquirer = inquirer as jest.Mocked<typeof inquirer>;
+const mockReportService = {
+  runReport: jest.fn(),
+};
+let mockConsoleLog: jest.SpyInstance;
+let mockConsoleTable: jest.SpyInstance;
 
 jest.mock("inquirer");
 jest.mock("chalk", () => ({
@@ -10,15 +19,6 @@ jest.mock("chalk", () => ({
   green: jest.fn((str) => str),
   yellow: jest.fn((str) => str),
 }));
-
-const mockInquirer = inquirer as jest.Mocked<typeof inquirer>;
-let mockConsoleLog: jest.SpyInstance;
-let mockConsoleTable: jest.SpyInstance;
-
-const mockReportService = {
-  runReport: jest.fn(),
-};
-
 jest.mock("@services/report-service", () => ({
   ReportService: jest.fn().mockImplementation(() => mockReportService),
 }));

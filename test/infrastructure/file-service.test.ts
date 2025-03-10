@@ -1,11 +1,12 @@
 import fs from "fs";
 import path from "path";
-import { FileService } from "@infrastructure/file-service";
+
 import {
-  createCustomErrorResult,
   createErrorResult,
   createSuccessfulResult,
-} from "@/utilities/result-helper";
+} from "@utilities/result-helper";
+
+import { FileService } from "@infrastructure/file-service";
 
 jest.mock("fs", () => ({
   existsSync: jest.fn(),

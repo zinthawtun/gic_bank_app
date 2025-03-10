@@ -1,27 +1,27 @@
-import { InterestRuleDA } from "@/data-access/interest-rule-da";
-import { TransactionDA } from "@/data-access/transaction-da";
-import { FileService } from "@/infrastructure/file-service";
-import { Transaction, TransactionBalance } from "@/models/transaction";
-import { ReportService } from "@/services/report-service";
+import { InterestRuleDA } from "@data-access/interest-rule-da";
+import { TransactionDA } from "@data-access/transaction-da";
+
+import { Transaction, TransactionBalance } from "@models/transaction";
+
 import { createInterestRule, createTransaction } from "@test/scenario-helper";
+
+import { ReportService } from "@services/report-service";
+import { FileService } from "@infrastructure/file-service";
 
 const mockTransactionDA = {
   getTransactionsByAccountID: jest.fn(),
 };
-
 const mockInterestRuleDA = {
   getAllInterestRules: jest.fn(),
 };
+const mockConsoleLog = jest.spyOn(console, "log").mockImplementation();
 
-jest.mock("@/data-access/transaction-da", () => ({
+jest.mock("@data-access/transaction-da", () => ({
   TransactionDA: jest.fn().mockImplementation(() => mockTransactionDA),
 }));
-
-jest.mock("@/data-access/interest-rule-da", () => ({
+jest.mock("@data-access/interest-rule-da", () => ({
   InterestRuleDA: jest.fn().mockImplementation(() => mockInterestRuleDA),
 }));
-
-const mockConsoleLog = jest.spyOn(console, "log").mockImplementation();
 
 describe("ReportService_Test", () => {
   let reportService: ReportService;

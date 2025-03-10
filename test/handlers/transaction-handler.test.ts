@@ -1,23 +1,22 @@
-import { handleTransactionInputs } from "@handlers/transaction-handler";
 import inquirer from "inquirer";
 import chalk from "chalk";
 
 import { ValidationMessages } from "@config/constants";
+
+import { handleTransactionInputs } from "@handlers/transaction-handler";
+
+const mockInquirer = inquirer as jest.Mocked<typeof inquirer>;
+const mockTransactionService = {
+  generateTransactionID: jest.fn(),
+  process: jest.fn(),
+};
+let mockConsoleLog: jest.SpyInstance;
 
 jest.mock("inquirer");
 jest.mock("chalk", () => ({
   red: jest.fn((str) => str),
   green: jest.fn((str) => str),
 }));
-
-const mockInquirer = inquirer as jest.Mocked<typeof inquirer>;
-let mockConsoleLog: jest.SpyInstance;
-
-const mockTransactionService = {
-  generateTransactionID: jest.fn(),
-  process: jest.fn(),
-};
-
 jest.mock("@services/transaction-service", () => ({
   TransactionService: jest
     .fn()
@@ -110,11 +109,12 @@ describe("handleTransactionInputs_Test", () => {
       .mockResolvedValueOnce({ input: "20240321 ACC001 X 100" })
       .mockResolvedValueOnce({ input: "" });
 
-    await handleTransactionInputs();
+    const result = await handleTransactionInputs();
 
     const errorMessage = ValidationMessages.INVALID_TRANSACTION_TYPE;
     expect(chalk.red).toHaveBeenCalledWith(errorMessage);
     expect(mockConsoleLog).toHaveBeenCalledWith(errorMessage);
+    expect(result).toBe(true);
   });
 
   test("when amount is not a number, return error", async () => {
@@ -122,12 +122,13 @@ describe("handleTransactionInputs_Test", () => {
       .mockResolvedValueOnce({ input: "20240321 ACC001 D abc" })
       .mockResolvedValueOnce({ input: "" });
 
-    await handleTransactionInputs();
+    const result = await handleTransactionInputs();
 
     expect(chalk.red).toHaveBeenCalledWith(ValidationMessages.INVALID_AMOUNT);
     expect(mockConsoleLog).toHaveBeenCalledWith(
       ValidationMessages.INVALID_AMOUNT
     );
+    expect(result).toBe(true);
   });
 
   test("when amount is zero or negative, return error", async () => {
@@ -135,12 +136,13 @@ describe("handleTransactionInputs_Test", () => {
       .mockResolvedValueOnce({ input: "20240321 ACC001 D 0" })
       .mockResolvedValueOnce({ input: "" });
 
-    await handleTransactionInputs();
+    const result = await handleTransactionInputs();
 
     expect(chalk.red).toHaveBeenCalledWith(ValidationMessages.AMOUNT_TOO_SMALL);
     expect(mockConsoleLog).toHaveBeenCalledWith(
       ValidationMessages.AMOUNT_TOO_SMALL
     );
+    expect(result).toBe(true);
   });
 
   test("when amount exceeds limit, return error", async () => {
@@ -148,12 +150,13 @@ describe("handleTransactionInputs_Test", () => {
       .mockResolvedValueOnce({ input: "20240321 ACC001 D 1000001" })
       .mockResolvedValueOnce({ input: "" });
 
-    await handleTransactionInputs();
+    const result = await handleTransactionInputs();
 
     expect(chalk.red).toHaveBeenCalledWith(ValidationMessages.AMOUNT_TOO_LARGE);
     expect(mockConsoleLog).toHaveBeenCalledWith(
       ValidationMessages.AMOUNT_TOO_LARGE
     );
+    expect(result).toBe(true);
   });
 
   test("when amount has more than 2 decimal places, return error", async () => {
@@ -161,7 +164,7 @@ describe("handleTransactionInputs_Test", () => {
       .mockResolvedValueOnce({ input: "20240321 ACC001 D 100.123" })
       .mockResolvedValueOnce({ input: "" });
 
-    await handleTransactionInputs();
+    const result = await handleTransactionInputs();
 
     expect(chalk.red).toHaveBeenCalledWith(
       ValidationMessages.INVALID_DECIMAL_PLACES
@@ -169,6 +172,7 @@ describe("handleTransactionInputs_Test", () => {
     expect(mockConsoleLog).toHaveBeenCalledWith(
       ValidationMessages.INVALID_DECIMAL_PLACES
     );
+    expect(result).toBe(true);
   });
 
   test("when transaction processing throws Result error, return error message", async () => {
@@ -184,7 +188,7 @@ describe("handleTransactionInputs_Test", () => {
       .mockResolvedValueOnce({ input: "20240321 ACC001 D 100" })
       .mockResolvedValueOnce({ input: "" });
 
-    await handleTransactionInputs();
+    const result = await handleTransactionInputs();
 
     expect(chalk.red).toHaveBeenCalledWith(
       "An unexpected error occurred while processing the transaction"
@@ -192,6 +196,7 @@ describe("handleTransactionInputs_Test", () => {
     expect(mockConsoleLog).toHaveBeenCalledWith(
       "An unexpected error occurred while processing the transaction"
     );
+    expect(result).toBe(true);
   });
 
   test("when eerror instanceof Error, return error message", async () => {
@@ -206,7 +211,7 @@ describe("handleTransactionInputs_Test", () => {
       .mockResolvedValueOnce({ input: "20240321 ACC001 D 100" })
       .mockResolvedValueOnce({ input: "" });
 
-    await handleTransactionInputs();
+    const result = await handleTransactionInputs();
 
     expect(chalk.red).toHaveBeenCalledWith(
       "An unexpected error occurred while processing the transaction"
@@ -214,6 +219,7 @@ describe("handleTransactionInputs_Test", () => {
     expect(mockConsoleLog).toHaveBeenCalledWith(
       "An unexpected error occurred while processing the transaction"
     );
+    expect(result).toBe(true);
   });
 
   test("when transaction processing returns with error, return error message and continue", async () => {
