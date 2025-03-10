@@ -35,13 +35,13 @@ describe("handleTransactionInputs_Test", () => {
 
   test("when input is empty, should exit", async () => {
     mockInquirer.prompt.mockResolvedValueOnce({ input: "" });
-    
+
     const result = await handleTransactionInputs();
 
     expect(result).toBe(true);
   });
 
-  test("when input format is invalid, should show error", async () => {
+  test("when input format is invalid, return error", async () => {
     mockInquirer.prompt
       .mockResolvedValueOnce({ input: "20240321" })
       .mockResolvedValueOnce({ input: "" });
@@ -53,7 +53,7 @@ describe("handleTransactionInputs_Test", () => {
     expect(result).toBe(true);
   });
 
-  test("when date format is invalid, should show error", async () => {
+  test("when date format is invalid, return error", async () => {
     mockInquirer.prompt
       .mockResolvedValueOnce({ input: "2024-03-21 ACC001 D 100" })
       .mockResolvedValueOnce({ input: "" });
@@ -61,10 +61,12 @@ describe("handleTransactionInputs_Test", () => {
     await handleTransactionInputs();
 
     expect(chalk.red).toHaveBeenCalledWith("Invalid date format. Use YYYYMMdd");
-    expect(mockConsoleLog).toHaveBeenCalledWith("Invalid date format. Use YYYYMMdd");
+    expect(mockConsoleLog).toHaveBeenCalledWith(
+      "Invalid date format. Use YYYYMMdd"
+    );
   });
 
-  test("when date is over the end of month, should show error ", async () => {
+  test("when date is over the end of month, return error ", async () => {
     mockInquirer.prompt
       .mockResolvedValueOnce({ input: "20240231 ACC001 D 100" })
       .mockResolvedValueOnce({ input: "" });
@@ -75,19 +77,20 @@ describe("handleTransactionInputs_Test", () => {
     expect(mockConsoleLog).toHaveBeenCalledWith("Invalid date");
   });
 
-  test("when transaction type is invalid, should show error", async () => {
+  test("when transaction type is invalid, return error", async () => {
     mockInquirer.prompt
       .mockResolvedValueOnce({ input: "20240321 ACC001 X 100" })
       .mockResolvedValueOnce({ input: "" });
 
     await handleTransactionInputs();
 
-    const errorMessage = "Invalid transaction type. Valid types are 'D' for Deposit or 'W' for Withdrawal.";
+    const errorMessage =
+      "Invalid transaction type. Valid types are 'D' for Deposit or 'W' for Withdrawal.";
     expect(chalk.red).toHaveBeenCalledWith(errorMessage);
     expect(mockConsoleLog).toHaveBeenCalledWith(errorMessage);
   });
 
-  test("when amount is not a number, should show error", async () => {
+  test("when amount is not a number, return error", async () => {
     mockInquirer.prompt
       .mockResolvedValueOnce({ input: "20240321 ACC001 D abc" })
       .mockResolvedValueOnce({ input: "" });
@@ -98,7 +101,7 @@ describe("handleTransactionInputs_Test", () => {
     expect(mockConsoleLog).toHaveBeenCalledWith("Invalid amount");
   });
 
-  test("when amount is zero or negative, should show error", async () => {
+  test("when amount is zero or negative, return error", async () => {
     mockInquirer.prompt
       .mockResolvedValueOnce({ input: "20240321 ACC001 D 0" })
       .mockResolvedValueOnce({ input: "" });
@@ -106,10 +109,12 @@ describe("handleTransactionInputs_Test", () => {
     await handleTransactionInputs();
 
     expect(chalk.red).toHaveBeenCalledWith("Amount must be greater than 0");
-    expect(mockConsoleLog).toHaveBeenCalledWith("Amount must be greater than 0");
+    expect(mockConsoleLog).toHaveBeenCalledWith(
+      "Amount must be greater than 0"
+    );
   });
 
-  test("when amount exceeds limit, should show error", async () => {
+  test("when amount exceeds limit, return error", async () => {
     mockInquirer.prompt
       .mockResolvedValueOnce({ input: "20240321 ACC001 D 1000001" })
       .mockResolvedValueOnce({ input: "" });
@@ -117,21 +122,27 @@ describe("handleTransactionInputs_Test", () => {
     await handleTransactionInputs();
 
     expect(chalk.red).toHaveBeenCalledWith("Amount must not exceed 1,000,000");
-    expect(mockConsoleLog).toHaveBeenCalledWith("Amount must not exceed 1,000,000");
+    expect(mockConsoleLog).toHaveBeenCalledWith(
+      "Amount must not exceed 1,000,000"
+    );
   });
 
-  test("when amount has more than 2 decimal places, should show error", async () => {
+  test("when amount has more than 2 decimal places, return error", async () => {
     mockInquirer.prompt
       .mockResolvedValueOnce({ input: "20240321 ACC001 D 100.123" })
       .mockResolvedValueOnce({ input: "" });
 
     await handleTransactionInputs();
 
-    expect(chalk.red).toHaveBeenCalledWith("Amount can have up to 2 decimal places");
-    expect(mockConsoleLog).toHaveBeenCalledWith("Amount can have up to 2 decimal places");
+    expect(chalk.red).toHaveBeenCalledWith(
+      "Amount can have up to 2 decimal places"
+    );
+    expect(mockConsoleLog).toHaveBeenCalledWith(
+      "Amount can have up to 2 decimal places"
+    );
   });
 
-  test("when transaction processing throws Result error, should show error message", async () => {
+  test("when transaction processing throws Result error, return error message", async () => {
     mockTransactionService.generateTransactionID.mockResolvedValueOnce(
       "20240321-01"
     );
@@ -145,13 +156,19 @@ describe("handleTransactionInputs_Test", () => {
 
     await handleTransactionInputs();
 
-    expect(chalk.red).toHaveBeenCalledWith({"errorMessage": "Result error message"});
-    expect(mockConsoleLog).toHaveBeenCalledWith({"errorMessage": "Result error message"});
+    expect(chalk.red).toHaveBeenCalledWith({
+      errorMessage: "Result error message",
+    });
+    expect(mockConsoleLog).toHaveBeenCalledWith({
+      errorMessage: "Result error message",
+    });
     expect(chalk.red).toHaveBeenCalledWith("Failed to process transaction!");
-    expect(mockConsoleLog).toHaveBeenCalledWith("Failed to process transaction!");
+    expect(mockConsoleLog).toHaveBeenCalledWith(
+      "Failed to process transaction!"
+    );
   });
 
-  test("when transaction processing throws Error object, should show error message", async () => {
+  test("when transaction processing throws Error object, return error message", async () => {
     mockTransactionService.generateTransactionID.mockResolvedValueOnce(
       "20240321-01"
     );
@@ -169,10 +186,12 @@ describe("handleTransactionInputs_Test", () => {
     expect(chalk.red).toHaveBeenCalledWith(error);
     expect(mockConsoleLog).toHaveBeenCalledWith(error);
     expect(chalk.red).toHaveBeenCalledWith("Failed to process transaction!");
-    expect(mockConsoleLog).toHaveBeenCalledWith("Failed to process transaction!");
+    expect(mockConsoleLog).toHaveBeenCalledWith(
+      "Failed to process transaction!"
+    );
   });
 
-  test("when transaction processing throws unknown error type, should show generic message", async () => {
+  test("when transaction processing throws unknown error type, return generic message", async () => {
     mockTransactionService.generateTransactionID.mockResolvedValueOnce(
       "20240321-01"
     );
@@ -187,10 +206,12 @@ describe("handleTransactionInputs_Test", () => {
     expect(chalk.red).toHaveBeenCalledWith("Unknown error");
     expect(mockConsoleLog).toHaveBeenCalledWith("Unknown error");
     expect(chalk.red).toHaveBeenCalledWith("Failed to process transaction!");
-    expect(mockConsoleLog).toHaveBeenCalledWith("Failed to process transaction!");
+    expect(mockConsoleLog).toHaveBeenCalledWith(
+      "Failed to process transaction!"
+    );
   });
 
-  test("when transaction processing returns with error, should show error message and continue", async () => {
+  test("when transaction processing returns with error, return error message and continue", async () => {
     const mockTransactionId = "20240321-01";
     mockTransactionService.generateTransactionID.mockResolvedValueOnce(
       mockTransactionId

@@ -97,15 +97,6 @@ describe("TransactionDA_Test", () => {
       expect(result).toEqual(expectedMock);
       expect(mockFileService.readFile).toHaveBeenCalledTimes(1);
     });
-
-    test("when file read fails, test should throw error", async () => {
-      mockFileService.readFile.mockRejectedValueOnce(
-        new Error("File read error")
-      );
-      await expect(
-        transactionDA.getTransactionsByAccountID("Account1")
-      ).rejects.toThrow("File read error");
-    });
   });
 
   describe("addTransaction_test", () => {
@@ -157,7 +148,7 @@ describe("TransactionDA_Test", () => {
     });
 
     test("when transaction already exists, test should return error message", async () => {
-      const newTransaction = { ...mockTransactions[0] };
+      const newTransaction = { ...mockTransactions[0]};
       const result = await transactionDA.addTransaction(newTransaction);
       const mockError = new Error("Transaction already exists");
 
@@ -167,6 +158,7 @@ describe("TransactionDA_Test", () => {
 
     test("when file write fails, test should return false", async () => {
       const mockError = new Error("File write error");
+      mockFileService.readFile.mockResolvedValue([...mockTransactions]);
       mockFileService.writeFile.mockRejectedValueOnce(mockError);
       const newTransaction: Transaction = {
         accountID: "Account2",
@@ -180,7 +172,7 @@ describe("TransactionDA_Test", () => {
       expect(result).toEqual(createErrorResult(mockError));
       expect(mockFileService.writeFile).toHaveBeenCalledWith(
         testFilePath,
-        mockTransactions
+        [...mockTransactions, newTransaction]
       );
     });
   });

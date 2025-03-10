@@ -422,5 +422,15 @@ describe("ReportService_Test", () => {
         "No transaction found for the month"
       );
     });
+
+    test("when the report service has unexpected error", async () => {
+      mockTransactionDA.getTransactionsByAccountID.mockReturnValue(
+        new Error("Unexpected error")
+      );
+      const result = await reportService.runReport(testAccountID, testDate);
+      expect(result.result.errorMessage).toBe(
+        "Failed to generate account statement"
+      );
+    });
   });
 });

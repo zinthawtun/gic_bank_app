@@ -1,5 +1,8 @@
 import inquirer from "inquirer";
 import chalk from "chalk";
+import { handleTransactionInputs } from "./handlers/transaction-handler";
+import { handleInterestInputs } from "./handlers/interest-rule-handler";
+import { handleStatementInputs } from "./handlers/statement-handler";
 
 export const Menu = async () => {
   console.log(
@@ -34,13 +37,14 @@ export const Menu = async () => {
 
     switch (action.toUpperCase()) {
       case "T":
-        return "Transactions";
+        await handleTransactionInputs();
+        break;
       case "I":
-        console.log("Interest Rules");
-        return "Interest Rules";
+        await handleInterestInputs();
+        break;
       case "P":
-        console.log("Print Statement");
-        return "Print Statement";
+        await handleStatementInputs();
+        break;
       case "Q":
         return "exit";
     }

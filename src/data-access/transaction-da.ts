@@ -24,7 +24,7 @@ export class TransactionDA {
 
     const transactions = await this.getTransactions();
 
-    return transactions.filter((t) => t.accountID === accountID);
+    return transactions.filter((t) => t.accountID.toLowerCase() === accountID.toLowerCase());
   }
 
   public async addTransaction(transaction: Transaction): Promise<Result> {
@@ -54,7 +54,11 @@ export class TransactionDA {
   }
 
   private async getTransactions(): Promise<Transaction[]> {
-    return this.fileService.readFile<Transaction[]>(transactionFilePath);
+    const transactions = await this.fileService.readFile<Transaction[]>(transactionFilePath);
+    return transactions.map(t => ({
+      ...t,
+      date: new Date(t.date)
+    }));
   }
 
   private async saveTransactions(transactions: Transaction[]): Promise<Result> {

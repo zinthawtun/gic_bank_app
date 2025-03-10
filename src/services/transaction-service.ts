@@ -33,19 +33,33 @@ export class TransactionService {
       account = { ...newAccount };
     }
 
-    if (transaction.type === "W") {
-      if (account.balance < transaction.amount) {
-        return createCustomErrorResult("Insufficient balance");
+    const currentAccountTransactions = await this.transactionDA.getTransactionsByAccountID(
+      transaction.accountID
+    );
+
+    if (currentAccountTransactions) {
+      for (const t of currentAccountTransactions) {
+        if (t.date.getTime() > transaction.date.getTime()) {
+          return createCustomErrorResult("Cannot process transaction in the past");
+        }
       }
-
-      account.balance -= transaction.amount;
-
-      return await this.executeTransaction(account, transaction);
-    } else {
-      account.balance += transaction.amount;
-
-      return await this.executeTransaction(account, transaction);
     }
+    
+    let updatedBalance: number;
+
+    if (transaction.type === "D") {
+      updatedBalance = account.balance + transaction.amount;
+    } else {
+      updatedBalance = account.balance - transaction.amount;
+    }
+
+    if (updatedBalance < 0) {
+      return createCustomErrorResult("Insufficient balance");
+    }
+
+    account.balance = updatedBalance;
+
+    return await this.executeTransaction(account, transaction);
   }
 
   public async generateTransactionID(
@@ -59,16 +73,16 @@ export class TransactionService {
       ? transactions.map((t) => t.transactionID)
       : [];
 
-    let transactionID = `${date.getFullYear()}${(date.getMonth() + 1)
+    let transactionID = `${date.getUTCFullYear()}${(date.getUTCMonth() + 1)
       .toString()
-      .padStart(2, "0")}${date.getDate()}-01`;
+      .padStart(2, "0")}${date.getUTCDate()}-01`;
 
     while (transactionIDs.includes(transactionID)) {
       const previousID = transactionID.split("-")[1];
       const newID = parseInt(previousID) + 1;
-      transactionID = `${date.getFullYear()}${(date.getMonth() + 1)
+      transactionID = `${date.getUTCFullYear()}${(date.getUTCMonth() + 1)
         .toString()
-        .padStart(2, "0")}${date.getDate()}-${newID
+        .padStart(2, "0")}${date.getUTCDate()}-${newID
         .toString()
         .padStart(2, "0")}`;
     }
@@ -83,15 +97,27 @@ export class TransactionService {
   }
 
   private async insertTransaction(transaction: Transaction): Promise<Result> {
-    return await this.transactionDA.addTransaction(transaction);
+    try {
+      return await this.transactionDA.addTransaction(transaction);
+    } catch (error) {
+      return createCustomErrorResult("An error occurred while inserting the transaction");
+    }
   }
 
   private async createAccount(account: Account): Promise<Result> {
-    return await this.accountDA.createNewAccount(account);
+    try {
+      return await this.accountDA.createNewAccount(account);
+    } catch (error) {
+      return createCustomErrorResult("An error occurred while creating the account");
+    }
   }
 
   private async updateAccount(account: Account): Promise<Result> {
-    return await this.accountDA.updateAccount(account);
+    try {
+      return await this.accountDA.updateAccount(account);
+    } catch (error) {
+      return createCustomErrorResult("An error occurred while updating the account");
+    }
   }
 
   private async executeTransaction(
