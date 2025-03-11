@@ -1,19 +1,18 @@
-import { Account } from "@/models/account";
-import { Transaction } from "@/models/transaction";
 import { AccountDA } from "@data-access/account-da";
 import { TransactionDA } from "@data-access/transaction-da";
+
+import { Account } from "@models/account";
+import { Transaction } from "@models/transaction";
 
 import {
   createCustomErrorResult,
   createErrorResult,
   createSuccessfulResult,
 } from "@utilities/result-helper";
-
-import { TransactionService } from "@/services/transaction-service";
-
-import { FileService } from "@/infrastructure/file-service";
-
 import { createAccount, createTransaction } from "@test/scenario-helper";
+
+import { TransactionService } from "@services/transaction-service";
+import { FileService } from "@infrastructure/file-service";
 
 const mockAccountDA = {
   getAccountByID: jest.fn(),
@@ -28,7 +27,6 @@ const mockTransactionDA = {
 jest.mock("@data-access/account-da", () => ({
   AccountDA: jest.fn().mockImplementation(() => mockAccountDA),
 }));
-
 jest.mock("@data-access/transaction-da", () => ({
   TransactionDA: jest.fn().mockImplementation(() => mockTransactionDA),
 }));
@@ -36,14 +34,8 @@ jest.mock("@data-access/transaction-da", () => ({
 describe("TransactionService_Test", () => {
   let transactionService: TransactionService;
   const mockAccounts: Account[] = [
-    {
-      accountID: "Account01",
-      balance: 100,
-    },
-    {
-      accountID: "Account02",
-      balance: 200,
-    },
+    createAccount("Account01", 100),
+    createAccount("Account02", 200),
   ];
 
   beforeEach(() => {
@@ -64,6 +56,89 @@ describe("TransactionService_Test", () => {
   });
 
   describe("process_test", () => {
+    test("when account is not found and trying to withdraw before any deposits, should return error", async () => {
+      const newTransaction: Transaction = createTransaction(
+        "20240320-01",
+        new Date("2024-03-20"),
+        "Account03",
+        "W",
+        100
+      );
+      mockAccountDA.getAccountByID.mockResolvedValue(undefined);
+      mockTransactionDA.getTransactionsByAccountID.mockResolvedValue([]);
+
+      const result = await transactionService.process(newTransaction);
+
+      expect(result).toEqual(createCustomErrorResult("Insufficient balance"));
+    });
+
+    test("when trying to withdraw with insufficient with backdate transaction, should return error", async () => {
+      const existingTransactions = [
+        createTransaction(
+          "20240320-01",
+          new Date("2024-03-20"),
+          "Account01",
+          "D",
+          100
+        ),
+      ];
+      const newTransaction: Transaction = createTransaction(
+        "20240319-01",
+        new Date("2024-03-19"),
+        "Account01",
+        "W",
+        50
+      );
+
+      mockAccountDA.getAccountByID.mockResolvedValue(mockAccounts[0]);
+      mockTransactionDA.getTransactionsByAccountID.mockResolvedValue(
+        existingTransactions
+      );
+
+      const result = await transactionService.process(newTransaction);
+
+      expect(result).toEqual(
+        createCustomErrorResult("Cannot process transaction in the past")
+      );
+    });
+
+    test("when withdrawing with sufficient historical balance, should succeed", async () => {
+      const existingTransactions = [
+        createTransaction(
+          "20240319-01",
+          new Date("2024-03-19"),
+          "Account01",
+          "D",
+          200
+        ),
+      ];
+      const mockAccount = createAccount("Account01", 200);
+      const newTransaction: Transaction = createTransaction(
+        "20240320-01",
+        new Date("2024-03-20"),
+        "Account01",
+        "W",
+        150
+      );
+      const updatedAccount: Account = createAccount(
+        newTransaction.accountID,
+        mockAccount.balance - newTransaction.amount
+      );
+
+      mockAccountDA.getAccountByID.mockResolvedValue(mockAccount);
+      mockTransactionDA.getTransactionsByAccountID.mockResolvedValue(
+        existingTransactions
+      );
+
+      const result = await transactionService.process(newTransaction);
+
+      expect(result).toEqual(createSuccessfulResult());
+      expect(mockTransactionDA.addTransaction).toHaveBeenCalledWith(
+        newTransaction
+      );
+      expect(mockAccountDA.updateAccount).toHaveBeenCalledWith(updatedAccount);
+    });
+
     test("when account is not found, withdrawal transaction should return error", async () => {
       const newTransaction: Transaction = createTransaction(
         "20240320-01",
@@ -73,6 +148,7 @@ describe("TransactionService_Test", () => {
         100
       );
       mockAccountDA.getAccountByID.mockResolvedValue(undefined);
+      mockTransactionDA.getTransactionsByAccountID.mockResolvedValue([]);
 
       const result = await transactionService.process(newTransaction);
 
@@ -135,7 +211,7 @@ describe("TransactionService_Test", () => {
 
     test("when account is not found, creating account has error and return error", async () => {
       const newTransaction: Transaction = createTransaction(
-        "20240320-01",    
+        "20240320-01",
         new Date("2024-03-20"),
         "Account03",
         "D",
@@ -163,6 +239,7 @@ describe("TransactionService_Test", () => {
       );
 
       mockAccountDA.getAccountByID.mockResolvedValue(mockAccounts[0]);
+      mockTransactionDA.getTransactionsByAccountID.mockResolvedValue([]);
 
       const result = await transactionService.process(newTransaction);
 
@@ -170,6 +247,15 @@ describe("TransactionService_Test", () => {
     });
 
     test("when account is found, withdrawal sufficient amount should return success", async () => {
+      const existingTransactions = [
+        createTransaction(
+          "20240319-01",
+          new Date("2024-03-19"),
+          "Account01",
+          "D",
+          150
+        ),
+      ];
       const newTransaction: Transaction = createTransaction(
         "20240320-01",
         new Date("2024-03-20"),
@@ -183,6 +269,9 @@ describe("TransactionService_Test", () => {
       );
 
       mockAccountDA.getAccountByID.mockResolvedValue(mockAccounts[0]);
+      mockTransactionDA.getTransactionsByAccountID.mockResolvedValue(
+        existingTransactions
+      );
 
       const result = await transactionService.process(newTransaction);
 
@@ -216,34 +305,149 @@ describe("TransactionService_Test", () => {
       );
       expect(mockAccountDA.updateAccount).toHaveBeenCalledWith(updatedAccount);
     });
-  });
 
-  describe("getAccountByAccountID_test", () => {
-    test("when account is not found, it should return undefined", async () => {
-      mockAccountDA.getAccountByID.mockResolvedValue(undefined);
-
-      const result = await (transactionService as any).getAccountByAccountID(
-        "Account03"
+    test("when account is found and updating has error result, return proper error", async () => {
+      const expectedError = createErrorResult("Invalid operation");
+      const newTransaction: Transaction = createTransaction(
+        "20240320-01",
+        new Date("2024-03-20"),
+        "Account01",
+        "D",
+        50
+      );
+      const updatedAccount: Account = createAccount(
+        newTransaction.accountID,
+        mockAccounts[0].balance + newTransaction.amount
       );
 
-      expect(result).toBeUndefined();
-      expect(mockAccountDA.getAccountByID).toHaveBeenCalledWith("Account03");
+      mockAccountDA.getAccountByID.mockResolvedValue(mockAccounts[0]);
+      mockAccountDA.updateAccount.mockResolvedValue(expectedError);
+
+      const result = await transactionService.process(newTransaction);
+
+      expect(result).toEqual(createErrorResult("Invalid operation"));
     });
 
-    test("when account is found, it should return the account", async () => {
-      mockAccountDA.getAccountByID.mockResolvedValue(mockAccounts[0]);
+    test("when there is no previous transactions, test should return success", async () => {
+      const newTransaction = createTransaction(
+        "20240320-01",
+        new Date("2024-03-20"),
+        "Account01",
+        "D",
+        100
+      );
 
-      const result = await (transactionService as any).getAccountByAccountID(
+      const account = createAccount("Account01", 0);
+      mockAccountDA.getAccountByID.mockResolvedValue(account);
+      mockTransactionDA.getTransactionsByAccountID.mockResolvedValue([]);
+
+      const result = await transactionService.process(newTransaction);
+
+      expect(result).toEqual(createSuccessfulResult());
+      expect(mockAccountDA.updateAccount).toHaveBeenCalledWith(
+        expect.objectContaining({
+          accountID: "Account01",
+          balance: 100,
+        })
+      );
+    });
+
+    test("when an error occurred while inserting the transaction", async () => {
+      const newTransaction = createTransaction(
+        "20240320-01",
+        new Date("2024-03-20"),
+        "Account01",
+        "D",
+        100
+      );
+
+      const account = createAccount("Account01", 0);
+      mockAccountDA.getAccountByID.mockResolvedValue(account);
+      mockTransactionDA.getTransactionsByAccountID.mockResolvedValue([]);
+      mockTransactionDA.addTransaction.mockRejectedValue(
+        createCustomErrorResult(
+          "An error occurred while inserting the transaction"
+        )
+      );
+
+      const result = await transactionService.process(newTransaction);
+
+      expect(result).toEqual(
+        createCustomErrorResult(
+          "An error occurred while inserting the transaction"
+        )
+      );
+    });
+
+    test("when an error occurred while creating the account", async () => {
+      const newTransaction = createTransaction(
+        "20240320-01",
+        new Date("2024-03-20"),
+        "Account01",
+        "D",
+        100
+      );
+
+      mockAccountDA.getAccountByID.mockResolvedValue(undefined);
+      mockAccountDA.createNewAccount.mockRejectedValue(
+        createCustomErrorResult("An error occurred while creating the account")
+      );
+
+      const result = await transactionService.process(newTransaction);
+
+      expect(result).toEqual(
+        createCustomErrorResult("An error occurred while creating the account")
+      );
+    });
+  });
+
+  test("when an error occurred while updating the account", async () => {
+    const newTransaction = createTransaction(
+      "20240320-01",
+      new Date("2024-03-20"),
+      "Account01",
+      "D",
+      100
+    );
+
+    const account = createAccount("Account01", 0);
+    mockAccountDA.getAccountByID.mockResolvedValue(account);
+    mockTransactionDA.getTransactionsByAccountID.mockResolvedValue([]);
+    mockAccountDA.updateAccount.mockRejectedValue(
+      createCustomErrorResult("An error occurred while updating the account")
+    );
+
+    const result = await transactionService.process(newTransaction);
+
+    expect(result).toEqual(
+      createCustomErrorResult("An error occurred while updating the account")
+    );
+  });
+
+  describe("generateTransactionID_test", () => {
+    test("when getTransactionsByAccountID returns null, should handle gracefully", async () => {
+      mockTransactionDA.getTransactionsByAccountID.mockResolvedValue(null);
+
+      const result = await transactionService.generateTransactionID(
+        new Date("2024-03-20"),
         "Account01"
       );
 
-      expect(result).toEqual(mockAccounts[0]);
-      expect(mockAccountDA.getAccountByID).toHaveBeenCalledWith("Account01");
+      expect(result).toBe("20240320-01");
     });
-  });
 
-  describe("insertTransaction_test", () => {
-    test("when transaction is valid, it should return success", async () => {
+    test("when getTransactionsByAccountID returns undefined, should handle gracefully", async () => {
+      mockTransactionDA.getTransactionsByAccountID.mockResolvedValue(undefined);
+
+      const result = await transactionService.generateTransactionID(
+        new Date("2024-03-20"),
+        "Account01"
+      );
+
+      expect(result).toBe("20240320-01");
+    });
+
+    test("when account has no transactions, it should return transaction ID", async () => {
       const newTransaction: Transaction = createTransaction(
         "20240320-01",
         new Date("2024-03-20"),
@@ -252,69 +456,18 @@ describe("TransactionService_Test", () => {
         50
       );
 
-      const result = await (transactionService as any).insertTransaction(
-        newTransaction
+      const result = await (transactionService as any).generateTransactionID(
+        newTransaction.date,
+        newTransaction.accountID
       );
 
-      expect(result).toEqual(createSuccessfulResult());
-      expect(mockTransactionDA.addTransaction).toHaveBeenCalledWith(
-        newTransaction
+      expect(result).toEqual("20240320-01");
+      expect(mockTransactionDA.getTransactionsByAccountID).toHaveBeenCalledWith(
+        newTransaction.accountID
       );
     });
-  });
 
-  describe("createAccount_test", () => {
-    test("when account is valid, it should return success", async () => {
-      const newAccount: Account = createAccount("Account03", 0);
-
-      const result = await (transactionService as any).createAccount(
-        newAccount
-      );
-
-      expect(result).toEqual(createSuccessfulResult());
-      expect(mockAccountDA.createNewAccount).toHaveBeenCalledWith(newAccount);
-    });
-  });
-
-  describe("updateAccount_test", () => {
-    test("when account is valid, it should return success", async () => {
-      const updatedAccount: Account = createAccount("Account01", 150);
-
-      const result = await (transactionService as any).updateAccount(
-        updatedAccount
-      );
-
-      expect(result).toEqual(createSuccessfulResult());
-      expect(mockAccountDA.updateAccount).toHaveBeenCalledWith(updatedAccount);
-    });
-  });
-
-  describe("executeTransaction_test", () => {
-    test("when account update has error, it should return error", async () => {
-      const account: Account = createAccount("Account01", 150);
-      const newTransaction: Transaction = createTransaction(
-        "20240320-01",
-        new Date("2024-03-20"),
-        "Account01",
-        "W",
-        200
-      );
-
-      mockAccountDA.updateAccount.mockResolvedValue(
-        createErrorResult("Invalid operation")
-      );
-
-      const result = await (transactionService as any).executeTransaction(
-        account,
-        newTransaction
-      );
-
-      expect(result).toEqual(createErrorResult("Invalid operation"));
-      expect(mockAccountDA.updateAccount).toHaveBeenCalledWith(account);
-    });
-
-    test("when transaction add has error, it should return error", async () => {
-      const account: Account = createAccount("Account01", 150);
+    test("when account has transactions, it should return new transaction ID", async () => {
       const newTransaction: Transaction = createTransaction(
         "20240320-01",
         new Date("2024-03-20"),
@@ -322,26 +475,39 @@ describe("TransactionService_Test", () => {
         "W",
         50
       );
+      const transactions: Transaction[] = [
+        createTransaction(
+          "20240320-01",
+          new Date("2024-03-20"),
+          "Account01",
+          "W",
+          50
+        ),
+        createTransaction(
+          "20240320-02",
+          new Date("2024-03-20"),
+          "Account01",
+          "W",
+          50
+        ),
+      ];
 
-      mockAccountDA.updateAccount.mockResolvedValue(createSuccessfulResult());
-      mockTransactionDA.addTransaction.mockResolvedValue(
-        createErrorResult("Invalid operation")
+      mockTransactionDA.getTransactionsByAccountID.mockResolvedValue(
+        transactions
       );
 
-      const result = await (transactionService as any).executeTransaction(
-        account,
-        newTransaction
+      const result = await (transactionService as any).generateTransactionID(
+        newTransaction.date,
+        newTransaction.accountID
       );
 
-      expect(result).toEqual(createErrorResult("Invalid operation"));
-      expect(mockAccountDA.updateAccount).toHaveBeenCalledWith(account);
-      expect(mockTransactionDA.addTransaction).toHaveBeenCalledWith(
-        newTransaction
+      expect(result).toEqual("20240320-03");
+      expect(mockTransactionDA.getTransactionsByAccountID).toHaveBeenCalledWith(
+        newTransaction.accountID
       );
     });
 
-    test("when account is valid, it should return success", async () => {
-      const account: Account = createAccount("Account01", 150);
+    test("when account has many 2 digits transactions on same date, it should return new transaction ID", async () => {
       const newTransaction: Transaction = createTransaction(
         "20240320-01",
         new Date("2024-03-20"),
@@ -349,16 +515,91 @@ describe("TransactionService_Test", () => {
         "W",
         50
       );
+      const transactions: Transaction[] = [
+        createTransaction(
+          "20240320-01",
+          new Date("2024-03-20"),
+          "Account01",
+          "W",
+          50
+        ),
+        createTransaction(
+          "20240320-02",
+          new Date("2024-03-20"),
+          "Account01",
+          "W",
+          50
+        ),
+        createTransaction(
+          "20240320-03",
+          new Date("2024-03-20"),
+          "Account01",
+          "W",
+          50
+        ),
+        createTransaction(
+          "20240320-04",
+          new Date("2024-03-20"),
+          "Account01",
+          "W",
+          50
+        ),
+        createTransaction(
+          "20240320-05",
+          new Date("2024-03-20"),
+          "Account01",
+          "W",
+          50
+        ),
+        createTransaction(
+          "20240320-06",
+          new Date("2024-03-20"),
+          "Account01",
+          "W",
+          50
+        ),
+        createTransaction(
+          "20240320-07",
+          new Date("2024-03-20"),
+          "Account01",
+          "W",
+          50
+        ),
+        createTransaction(
+          "20240320-08",
+          new Date("2024-03-20"),
+          "Account01",
+          "W",
+          50
+        ),
+        createTransaction(
+          "20240320-09",
+          new Date("2024-03-20"),
+          "Account01",
+          "W",
+          50
+        ),
+        createTransaction(
+          "20240320-10",
+          new Date("2024-03-20"),
+          "Account01",
+          "W",
+          50
+        ),
+      ];
 
-      const result = await (transactionService as any).executeTransaction(
-        account,
-        newTransaction
+      mockTransactionDA.getTransactionsByAccountID.mockResolvedValue(
+        transactions
       );
 
-      expect(result).toEqual(createSuccessfulResult());
-      expect(mockAccountDA.updateAccount).toHaveBeenCalledWith(account);
-      expect(mockTransactionDA.addTransaction).toHaveBeenCalledWith(
-        newTransaction
+      const result = await (transactionService as any).generateTransactionID(
+        newTransaction.date,
+        newTransaction.accountID
+      );
+
+      expect(result).toEqual("20240320-11");
+      expect(mockTransactionDA.getTransactionsByAccountID).toHaveBeenCalledWith(
+        newTransaction.accountID
       );
     });
   });

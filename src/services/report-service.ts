@@ -1,14 +1,14 @@
-import { Transaction, TransactionBalance } from "@/models/transaction";
-import { AccountStatementResult } from "@/models/result";
-import { InterestRule, AccountInterest } from "@/models/interest";
+import { InterestRuleDA } from "@data-access/interest-rule-da";
+import { TransactionDA } from "@data-access/transaction-da";
+
+import { Transaction, TransactionBalance } from "@models/transaction";
+import { AccountStatementResult } from "@models/result";
+import { InterestRule, AccountInterest } from "@models/interest";
 
 import {
   createCustomErrorResult,
   createSuccessfulResult,
-} from "@/utilities/result-helper";
-
-import { InterestRuleDA } from "@/data-access/interest-rule-da";
-import { TransactionDA } from "@/data-access/transaction-da";
+} from "@utilities/result-helper";
 
 export class ReportService {
   private transactionDA: TransactionDA;
@@ -23,51 +23,59 @@ export class ReportService {
     accountID: string,
     date: Date
   ): Promise<AccountStatementResult> {
-    const transactions = await this.getTransactions(accountID);
+    try {
+      const transactions = await this.getTransactions(accountID);
 
-    if (transactions.length === 0) {
-      return {
-        result: createCustomErrorResult("No transaction found"),
-        transactions: [],
-        calculatedAccountInterest: undefined,
-      } as AccountStatementResult;
-    }
+      if (transactions.length === 0) {
+        return {
+          result: createCustomErrorResult("No transaction found"),
+          transactions: [],
+          calculatedAccountInterest: undefined,
+        } as AccountStatementResult;
+      }
 
-    const currentMonthTransactions = transactions.filter((t) =>
-      this.isMonthYearEqual(t.date, date)
-    );
-
-    const historicalBalance = this.calculateHistoricalBalance(
-      transactions,
-      date
-    );
-
-    const currentMonthStatement = this.calculateCurrentMonthStatement(
-      historicalBalance,
-      currentMonthTransactions
-    );
-
-    if (currentMonthStatement.length === 0) {
-      return {
-        result: createCustomErrorResult("No transaction found for the month"),
-        transactions: [],
-        calculatedAccountInterest: undefined,
-      } as AccountStatementResult;
-    }
-
-    const currentMonthAccountInterest =
-      await this.calculateCurrentMonthInterestRate(
-        accountID,
-        transactions,
-        date,
-        historicalBalance
+      const currentMonthTransactions = transactions.filter((t) =>
+        this.isMonthYearEqual(t.date, date)
       );
 
-    return {
-      result: createSuccessfulResult(),
-      transactions: currentMonthStatement,
-      calculatedAccountInterest: currentMonthAccountInterest,
-    } as AccountStatementResult;
+      const historicalBalance = this.calculateHistoricalBalance(
+        transactions,
+        date
+      );
+
+      const currentMonthStatement = this.calculateCurrentMonthStatement(
+        historicalBalance,
+        currentMonthTransactions
+      );
+
+      if (currentMonthStatement.length === 0) {
+        return {
+          result: createCustomErrorResult("No transaction found for the month"),
+          transactions: [],
+          calculatedAccountInterest: undefined,
+        } as AccountStatementResult;
+      }
+
+      const currentMonthAccountInterest =
+        await this.calculateCurrentMonthInterestRate(
+          accountID,
+          transactions,
+          date,
+          historicalBalance
+        );
+
+      return {
+        result: createSuccessfulResult(),
+        transactions: currentMonthStatement,
+        calculatedAccountInterest: currentMonthAccountInterest,
+      } as AccountStatementResult;
+    } catch (error) {
+      return {
+        result: createCustomErrorResult("Failed to generate account statement"),
+        transactions: [],
+        calculatedAccountInterest: undefined,
+      } as AccountStatementResult;
+    }
   }
 
   private async getTransactions(accountID: string): Promise<Transaction[]> {
@@ -83,7 +91,7 @@ export class ReportService {
     transactions: Transaction[],
     date: Date
   ): number {
-    const lastDate = new Date(date.getFullYear(), date.getMonth() - 1, 1);
+    const lastDate = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() - 1, 1));
     const historicalTransactions = transactions.filter((t) =>
       this.isMonthYearEqual(t.date, lastDate)
     );
@@ -245,9 +253,8 @@ export class ReportService {
   }
 
   private isMonthYearEqual(date1: Date, date2: Date): boolean {
-    return (
-      date1.getMonth() === date2.getMonth() &&
-      date1.getFullYear() === date2.getFullYear()
-    );
+    const d1 = new Date(Date.UTC(date1.getUTCFullYear(), date1.getUTCMonth(), 1));
+    const d2 = new Date(Date.UTC(date2.getUTCFullYear(), date2.getUTCMonth(), 1));
+    return d1.getTime() === d2.getTime();
   }
 }

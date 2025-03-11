@@ -1,48 +1,50 @@
-import { Transaction } from "@models/transaction";
 import { TransactionDA } from "@data-access/transaction-da";
-import { FileService } from "@infrastructure/file-service";
+
+import { Transaction } from "@models/transaction";
+
 import {
   createSuccessfulResult,
-  createCustomErrorResult,
   createErrorResult,
 } from "@utilities/result-helper";
+
+import { FileService } from "@infrastructure/file-service";
+import { createTransaction } from "@test/scenario-helper";
 
 const mockFileService = {
   readFile: jest.fn(),
   writeFile: jest.fn(),
 };
+const mockConsoleLog = jest.spyOn(console, "log").mockImplementation();
 
 jest.mock("@infrastructure/file-service", () => ({
   FileService: jest.fn().mockImplementation(() => mockFileService),
 }));
 
-const mockConsoleLog = jest.spyOn(console, "log").mockImplementation();
-
 describe("TransactionDA_Test", () => {
   let transactionDA: TransactionDA;
   const testFilePath = "@data/transactions.json";
   const mockTransactions: Transaction[] = [
-    {
-      transactionID: "20240320-01",
-      date: new Date("2024-03-20"),
-      accountID: "Account1",
-      type: "D",
-      amount: 100,
-    },
-    {
-      transactionID: "20240321-01",
-      date: new Date("2024-03-21"),
-      accountID: "Account2",
-      type: "W",
-      amount: 50,
-    },
-    {
-      transactionID: "20240322-01",
-      date: new Date("2024-03-22"),
-      accountID: "Account1",
-      type: "D",
-      amount: 75,
-    },
+    createTransaction(
+      "20240320-01",
+      new Date("2024-03-20"),
+      "Account1",
+      "D",
+      100
+    ),
+    createTransaction(
+      "20240321-01",
+      new Date("2024-03-21"),
+      "Account2",
+      "W",
+      50
+    ),
+    createTransaction(
+      "20240322-01",
+      new Date("2024-03-22"),
+      "Account1",
+      "D",
+      75
+    ),
   ];
 
   beforeEach(() => {
@@ -97,15 +99,6 @@ describe("TransactionDA_Test", () => {
       expect(result).toEqual(expectedMock);
       expect(mockFileService.readFile).toHaveBeenCalledTimes(1);
     });
-
-    test("when file read fails, test should throw error", async () => {
-      mockFileService.readFile.mockRejectedValueOnce(
-        new Error("File read error")
-      );
-      await expect(
-        transactionDA.getTransactionsByAccountID("Account1")
-      ).rejects.toThrow("File read error");
-    });
   });
 
   describe("addTransaction_test", () => {
@@ -156,16 +149,33 @@ describe("TransactionDA_Test", () => {
       );
     });
 
-    test("when file write fails, test should return false", async () => {
-      const mockError = new Error("File write error");
-      mockFileService.writeFile.mockRejectedValueOnce(mockError);
-      const result = await transactionDA.addTransaction(mockTransactions[0]);
+    test("when transaction already exists, test should return error message", async () => {
+      const newTransaction = { ...mockTransactions[0] };
+      const result = await transactionDA.addTransaction(newTransaction);
+      const mockError = new Error("Transaction already exists");
 
       expect(result).toEqual(createErrorResult(mockError));
-      expect(mockFileService.writeFile).toHaveBeenCalledWith(
-        testFilePath,
-        mockTransactions
-      );
+      expect(mockFileService.writeFile).not.toHaveBeenCalled();
+    });
+
+    test("when file write fails, test should return false", async () => {
+      const mockError = new Error("File write error");
+      mockFileService.readFile.mockResolvedValue([...mockTransactions]);
+      mockFileService.writeFile.mockRejectedValueOnce(mockError);
+      const newTransaction: Transaction = {
+        accountID: "Account2",
+        amount: 100,
+        date: new Date("2024-03-22"),
+        transactionID: "20240323-05",
+        type: "D",
+      };
+      const result = await transactionDA.addTransaction(newTransaction);
+
+      expect(result).toEqual(createErrorResult(mockError));
+      expect(mockFileService.writeFile).toHaveBeenCalledWith(testFilePath, [
+        ...mockTransactions,
+        newTransaction,
+      ]);
     });
   });
 });

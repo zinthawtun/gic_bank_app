@@ -1,8 +1,9 @@
-import { InterestRule } from "@/models/interest";
-import { InterestRuleDA } from "@/data-access/interest-rule-da";
-import { Result } from "@/models/result";
+import { InterestRule } from "@models/interest";
+import { InterestRuleDA } from "@data-access/interest-rule-da";
 
-import { createCustomErrorResult } from "@/utilities/result-helper";
+import { Result } from "@models/result";
+
+import { createCustomErrorResult } from "@utilities/result-helper";
 
 export class InterestRuleService {
   private interestRuleDA: InterestRuleDA;
@@ -25,13 +26,11 @@ export class InterestRuleService {
       return createCustomErrorResult("Invalid interest rule");
     }
 
-    const rules: InterestRule[] =
-      await this.loadAllInterestRules();
+    const rules: InterestRule[] = await this.loadAllInterestRules();
 
     let existingRule = rules.find(
       (rule) =>
-        new Date(rule.date).toDateString() ===
-        new Date(interestRule.date).toDateString()
+        new Date(rule.date).getTime() === new Date(interestRule.date).getTime()
     );
 
     if (!existingRule) {
@@ -40,11 +39,7 @@ export class InterestRuleService {
       existingRule.ruleID !== interestRule.ruleID &&
       existingRule.rate !== interestRule.rate
     ) {
-      return await this.replaceInterestRule(
-        existingRule,
-        interestRule,
-        rules
-      );
+      return await this.replaceInterestRule(existingRule, interestRule, rules);
     } else {
       return createCustomErrorResult("Interest rule already exists");
     }
@@ -54,7 +49,9 @@ export class InterestRuleService {
     return await this.interestRuleDA.getAllInterestRules();
   }
 
-  private async saveNewInterestRule(interestRule: InterestRule): Promise<Result> {
+  private async saveNewInterestRule(
+    interestRule: InterestRule
+  ): Promise<Result> {
     return await this.interestRuleDA.insertNewInterestRule(interestRule);
   }
 

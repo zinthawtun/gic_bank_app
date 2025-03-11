@@ -1,5 +1,5 @@
-import { AccountInterest } from "./interest";
-import { TransactionBalance } from "./transaction";
+import { AccountInterest } from "@models/interest";
+import { TransactionBalance } from "@models/transaction";
 
 export interface Result {
   hasError: boolean;

@@ -1,22 +1,24 @@
 import { AccountDA } from "@data-access/account-da";
+
 import { Account } from "@models/account";
-import { FileService } from "@infrastructure/file-service";
+
 import {
   createSuccessfulResult,
   createCustomErrorResult,
   createErrorResult,
 } from "@utilities/result-helper";
 
+import { FileService } from "@infrastructure/file-service";
+
 const mockFileService = {
   readFile: jest.fn(),
   writeFile: jest.fn(),
 };
+const mockConsoleLog = jest.spyOn(console, "log").mockImplementation();
 
 jest.mock("@infrastructure/file-service", () => ({
   FileService: jest.fn().mockImplementation(() => mockFileService),
 }));
-
-const mockConsoleLog = jest.spyOn(console, "log").mockImplementation();
 
 describe("AccountDA_Test", () => {
   let accountDA: AccountDA;

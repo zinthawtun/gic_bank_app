@@ -3,19 +3,21 @@ export default {
   preset: "ts-jest",
   testEnvironment: "node",
   transform: {
-    "^.+\\.tsx?$": [
+    "^.+\\.[tj]sx?$": [
       "ts-jest",
       {
         useESM: true,
         tsconfig: "tsconfig.test.json",
       },
-    ],
+    ]
   },
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
     "^@/(.*)$": "<rootDir>/src/$1",
     "^@test/(.*)$": "<rootDir>/test/$1",
     "^@data/(.*)$": "<rootDir>/data/$1",
+    "^@config/(.*)$": "<rootDir>/src/config/$1",
+    "^@handlers/(.*)$": "<rootDir>/src/handlers/$1",
     "^@models/(.*)$": "<rootDir>/src/models/$1",
     "^@services/(.*)$": "<rootDir>/src/services/$1",
     "^@data-access/(.*)$": "<rootDir>/src/data-access/$1",
@@ -25,5 +27,5 @@ export default {
   extensionsToTreatAsEsm: [".ts"],
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
   testPathIgnorePatterns: ["/node_modules/"],
-  roots: ["<rootDir>/src", "<rootDir>/test"],
+  roots: ["<rootDir>/src", "<rootDir>/test"]
 };

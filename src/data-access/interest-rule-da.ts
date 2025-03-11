@@ -1,10 +1,12 @@
-import { InterestRule } from "@/models/interest";
-import { Result } from "@/models/result";
+import { InterestRule } from "@models/interest";
+import { Result } from "@models/result";
+
 import {
   createCustomErrorResult,
   createErrorResult,
   createSuccessfulResult,
-} from "@/utilities/result-helper";
+} from "@utilities/result-helper";
+
 import { FileService } from "@infrastructure/file-service";
 
 const interestRuleFilePath = "@data/interest-rules.json";
@@ -57,9 +59,8 @@ export class InterestRuleDA {
     if (index === -1) {
       return createCustomErrorResult("Old interest rule not found");
     }
-    rules.splice(index, 1);
-    rules.splice(rules.indexOf(oldRule), 1);
 
+    rules.splice(index, 1);
     rules.push(newRule);
 
     return await this.saveInterestRules(rules);
@@ -70,18 +71,33 @@ export class InterestRuleDA {
   }
 
   private async getInterestRules(): Promise<InterestRule[]> {
-    return this.fileService.readFile<InterestRule[]>(interestRuleFilePath);
+    const rules = await this.fileService.readFile<InterestRule[]>(
+      interestRuleFilePath
+    );
+    return rules.map((rule) => ({
+      ...rule,
+      date: new Date(rule.date),
+    }));
   }
 
   private async saveInterestRules(
     interestRules: InterestRule[]
   ): Promise<Result> {
     try {
-      await this.fileService.writeFile(interestRuleFilePath, interestRules);
+      const rulesToSave = interestRules.map((rule) => ({
+        ...rule,
+        date: serializeDate(rule.date),
+      }));
+
+      await this.fileService.writeFile(interestRuleFilePath, rulesToSave);
 
       return createSuccessfulResult();
     } catch (error) {
       return createErrorResult(error);
     }
   }
+}
+
+function serializeDate(date: Date | string): string {
+  return date instanceof Date ? date.toISOString() : date;
 }

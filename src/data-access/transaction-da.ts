@@ -1,11 +1,13 @@
-import { FileService } from "@infrastructure/file-service";
 import { Result } from "@models/result";
 import { Transaction } from "@models/transaction";
+
 import {
   createSuccessfulResult,
   createErrorResult,
   createCustomErrorResult,
 } from "@utilities/result-helper";
+
+import { FileService } from "@infrastructure/file-service";
 
 const transactionFilePath = "@data/transactions.json";
 
@@ -24,7 +26,9 @@ export class TransactionDA {
 
     const transactions = await this.getTransactions();
 
-    return transactions.filter((t) => t.accountID === accountID);
+    return transactions.filter(
+      (t) => t.accountID.toLowerCase() === accountID.toLowerCase()
+    );
   }
 
   public async addTransaction(transaction: Transaction): Promise<Result> {
@@ -41,19 +45,32 @@ export class TransactionDA {
     }
 
     const transactions = await this.getTransactions();
+
+    const transactionIDs = new Set(transactions.map((t) => t.transactionID));
+
+    if (transactionIDs.has(transaction.transactionID)) {
+      return createCustomErrorResult("Transaction already exists");
+    }
+
     transactions.push(transaction);
 
     return await this.saveTransactions(transactions);
   }
 
   private async getTransactions(): Promise<Transaction[]> {
-    return this.fileService.readFile<Transaction[]>(transactionFilePath);
+    const transactions = await this.fileService.readFile<Transaction[]>(
+      transactionFilePath
+    );
+    return transactions.map((t) => ({
+      ...t,
+      date: new Date(t.date),
+    }));
   }
 
   private async saveTransactions(transactions: Transaction[]): Promise<Result> {
     try {
       await this.fileService.writeFile(transactionFilePath, transactions);
-      
+
       return createSuccessfulResult();
     } catch (error) {
       return createErrorResult(error);

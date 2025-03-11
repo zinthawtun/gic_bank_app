@@ -1,6 +1,6 @@
-import { Account } from "@/models/account";
-import { InterestRule } from "@/models/interest";
-import { Transaction } from "@/models/transaction";
+import { Account } from "@models/account";
+import { InterestRule } from "@models/interest";
+import { Transaction } from "@models/transaction";
 
 export function createTransaction(
   transactionID: string,

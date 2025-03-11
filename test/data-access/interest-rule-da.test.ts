@@ -1,5 +1,7 @@
-import { InterestRule } from "@models/interest";
 import { InterestRuleDA } from "@data-access/interest-rule-da";
+
+import { InterestRule } from "@models/interest";
+
 import { FileService } from "@infrastructure/file-service";
 
 import {
@@ -12,12 +14,11 @@ const mockFileService = {
   readFile: jest.fn(),
   writeFile: jest.fn(),
 };
+const mockConsoleLog = jest.spyOn(console, "log").mockImplementation();
 
 jest.mock("@infrastructure/file-service", () => ({
   FileService: jest.fn().mockImplementation(() => mockFileService),
 }));
-
-const mockConsoleLog = jest.spyOn(console, "log").mockImplementation();
 
 describe("InterestRuleDA_Test", () => {
   let interestRuleDA: InterestRuleDA;
@@ -110,11 +111,18 @@ describe("InterestRuleDA_Test", () => {
 
     test("when interest rule is valid, test should return successful result", async () => {
       const newInterestRule: InterestRule = {
-        ruleID: "rule3",
+        ruleID: "rule4",
         rate: 0.03,
         date: new Date("2024-01-03"),
       };
       const updatedInterestRules = [...mockInterestRules, newInterestRule];
+      const updatedRules = updatedInterestRules.map((rule) => ({
+        ...rule,
+        date: rule.date.toISOString(),
+      }));
+
+      mockFileService.readFile.mockResolvedValue(mockInterestRules);
+
       const result = await interestRuleDA.insertNewInterestRule(
         newInterestRule
       );
@@ -122,7 +130,7 @@ describe("InterestRuleDA_Test", () => {
       expect(result).toEqual(createSuccessfulResult());
       expect(mockFileService.writeFile).toHaveBeenCalledWith(
         testFilePath,
-        updatedInterestRules
+        updatedRules
       );
     });
 
@@ -220,6 +228,64 @@ describe("InterestRuleDA_Test", () => {
 
       expect(result).toEqual(mockInterestRules);
       expect(mockFileService.readFile).toHaveBeenCalledWith(testFilePath);
+    });
+  });
+
+  describe("saveInterestRules", () => {
+    test("when saving rules with Date objects, should convert dates to ISO strings", async () => {
+      const dateObj = new Date("2024-03-20T00:00:00.000Z");
+      const rules: InterestRule[] = [
+        {
+          ruleID: "Rule01",
+          date: dateObj,
+          rate: 0.05,
+        },
+      ];
+
+      mockFileService.writeFile.mockResolvedValue(undefined);
+
+      const interestRuleDA = new InterestRuleDA(new FileService());
+      const result = await (interestRuleDA as any).saveInterestRules(rules);
+
+      expect(result).toEqual(createSuccessfulResult());
+      expect(mockFileService.writeFile).toHaveBeenCalledWith(
+        testFilePath,
+        expect.arrayContaining([
+          expect.objectContaining({
+            ruleID: "Rule01",
+            date: dateObj.toISOString(),
+            rate: 0.05,
+          }),
+        ])
+      );
+    });
+
+    test("when saving rules with ISO string dates, should preserve the ISO strings", async () => {
+      const isoString = "2024-03-20T00:00:00.000Z";
+      const rules: InterestRule[] = [
+        {
+          ruleID: "Rule01",
+          date: isoString as any,
+          rate: 0.05,
+        },
+      ];
+
+      mockFileService.writeFile.mockResolvedValue(undefined);
+
+      const interestRuleDA = new InterestRuleDA(new FileService());
+      const result = await (interestRuleDA as any).saveInterestRules(rules);
+
+      expect(result).toEqual(createSuccessfulResult());
+      expect(mockFileService.writeFile).toHaveBeenCalledWith(
+        testFilePath,
+        expect.arrayContaining([
+          expect.objectContaining({
+            ruleID: "Rule01",
+            date: isoString,
+            rate: 0.05,
+          }),
+        ])
+      );
     });
   });
 });
