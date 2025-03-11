@@ -7,17 +7,17 @@
 ### 3. Test - npm test
 ### 4. Run app - npm run start
 
-### Dev Local Env
+## Dev Local Env
 #### Nodejs Version - v20.18.0
 #### TSC Version - Version 5.7.2
 
-### Additional rules and validation checks added
+## Additional rules and validation checks added
 #### 1. Account Name or RuleID is limited to 20.
 #### 2. Transactions should be going forward starting from the first transaction. Injecting with past date is not allowed.
 #### 3. Interest rule can be overwritten with different rule-id and rate on the same date. Same rule id cannot be reused for different date.
 #### 4. Transaction limit is 1,000,000 per transaction.
 
-### Tests Coverage
+## Tests Coverage
 
 File                        | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
 ----------------------------|---------|----------|---------|---------|-------------------
