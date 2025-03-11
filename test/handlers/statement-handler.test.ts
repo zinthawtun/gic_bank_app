@@ -90,7 +90,7 @@ describe("handleStatementInputs_Test", () => {
       "ACC001",
       new Date(Date.UTC(2024, 2, 1))
     );
-    expect(chalk.green).toHaveBeenCalledWith("No transactions found");
+    expect(chalk.red).toHaveBeenCalledWith("No transactions found");
     expect(mockConsoleLog).toHaveBeenCalledWith("No transactions found");
     expect(result).toBe(true);
   });

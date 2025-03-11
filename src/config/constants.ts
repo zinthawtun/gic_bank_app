@@ -32,5 +32,5 @@ export const ValidationMessages = {
   INVALID_TRANSACTION_TYPE: 'Invalid transaction type. Valid types are "D" for Deposit or "W" for Withdrawal.',
   INVALID_MENU_CHOICE: "Invalid choice. Please enter T, I, P, or Q",
   INVALID_ACCOUNT_ID_LENGTH: "Account name must be less than 21 characters",
-  INVALID_INTEREST_ID_LENGTH: "Interest rule name must be less than 21 characters",
+  INVALID_INTEREST_ID_LENGTH: "Interest rule id must be less than 21 characters",
 } as const;

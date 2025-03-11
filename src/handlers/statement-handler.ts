@@ -50,7 +50,7 @@ export const handleStatementInputs = async (): Promise<boolean> => {
       const result = await reportService.runReport(account, firstDayOfMonth);
 
       if (result.transactions.length === 0) {
-        console.log(chalk.green("No transactions found"));
+        console.log(chalk.red("No transactions found"));
         return true;
       }
 
