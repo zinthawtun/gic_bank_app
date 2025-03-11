@@ -2,10 +2,10 @@
 
 ## How to run
 
-### 1. Install dependencies - npm i
-### 2. Build - npm run build
-### 3. Test - npm test
-### 4. Run app - npm run start
+#### 1. Install dependencies - npm i
+#### 2. Build - npm run build
+#### 3. Test - npm test
+#### 4. Run app - npm run start
 
 ## Dev Local Env
 #### Nodejs Version - v20.18.0
