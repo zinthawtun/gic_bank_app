@@ -1,4 +1,4 @@
-import { FilePaths } from "@/config/constants";
+import { FilePaths } from "@config/constants";
 
 import { TransactionDA } from "@data-access/transaction-da";
 

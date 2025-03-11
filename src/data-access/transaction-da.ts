@@ -1,4 +1,4 @@
-import { FilePaths } from "@/config/constants";
+import { FilePaths } from "@config/constants";
 
 import { Result } from "@models/result";
 import { Transaction } from "@models/transaction";

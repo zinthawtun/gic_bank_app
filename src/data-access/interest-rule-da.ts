@@ -1,4 +1,4 @@
-import { FilePaths } from "@/config/constants";
+import { FilePaths } from "@config/constants";
 
 import { InterestRule } from "@models/interest";
 import { Result } from "@models/result";

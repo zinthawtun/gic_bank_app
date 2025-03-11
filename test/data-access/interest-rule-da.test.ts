@@ -1,4 +1,4 @@
-import { FilePaths } from "@/config/constants";
+import { FilePaths } from "@config/constants";
 
 import { InterestRuleDA } from "@data-access/interest-rule-da";
 
