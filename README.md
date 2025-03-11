@@ -18,7 +18,7 @@
 #### 4. Transaction limit is 1,000,000 per transaction.
 
 ### Tests Coverage
-----------------------------|---------|----------|---------|---------|-------------------
+
 File                        | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
 ----------------------------|---------|----------|---------|---------|-------------------
 All files                   |     100 |      100 |     100 |     100 |
@@ -44,6 +44,5 @@ All files                   |     100 |      100 |     100 |     100 |
   validation-helper.ts      |     100 |      100 |     100 |     100 |
  test                       |     100 |      100 |     100 |     100 |
   scenario-helper.ts        |     100 |      100 |     100 |     100 |
-----------------------------|---------|----------|---------|---------|-------------------
 
 #### For running test automation at checkout, GitHub Actions is set up.
