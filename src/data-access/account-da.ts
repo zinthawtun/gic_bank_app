@@ -1,3 +1,5 @@
+import { FilePaths } from "@config/constants";
+
 import { Account } from "@models/account";
 import { Result } from "@models/result";
 
@@ -9,7 +11,7 @@ import {
 
 import { FileService } from "@infrastructure/file-service";
 
-const accountFilePath = "@data/accounts.json";
+const accountFilePath = FilePaths.ACCOUNTS;
 
 export class AccountDA {
   private fileService: FileService;

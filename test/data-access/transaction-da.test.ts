@@ -1,3 +1,5 @@
+import { FilePaths } from "@config/constants";
+
 import { TransactionDA } from "@data-access/transaction-da";
 
 import { Transaction } from "@models/transaction";
@@ -6,9 +8,9 @@ import {
   createSuccessfulResult,
   createErrorResult,
 } from "@utilities/result-helper";
+import { createTransaction } from "@test/scenario-helper";
 
 import { FileService } from "@infrastructure/file-service";
-import { createTransaction } from "@test/scenario-helper";
 
 const mockFileService = {
   readFile: jest.fn(),
@@ -22,7 +24,7 @@ jest.mock("@infrastructure/file-service", () => ({
 
 describe("TransactionDA_Test", () => {
   let transactionDA: TransactionDA;
-  const testFilePath = "@data/transactions.json";
+  const testFilePath = FilePaths.TRANSACTIONS;
   const mockTransactions: Transaction[] = [
     createTransaction(
       "20240320-01",
@@ -62,13 +64,13 @@ describe("TransactionDA_Test", () => {
   });
 
   describe("getTransactionByAccountID_test", () => {
-    test("when accountID is empty, test should return undefined", async () => {
+    test("when accountID is empty, return undefined", async () => {
       const result = await transactionDA.getTransactionsByAccountID("");
       expect(result).toBeUndefined();
       expect(mockFileService.readFile).not.toHaveBeenCalled();
     });
 
-    test("when accountID is null, test should return undefined", async () => {
+    test("when accountID is null, return undefined", async () => {
       const result = await transactionDA.getTransactionsByAccountID(
         null as any
       );
@@ -76,7 +78,7 @@ describe("TransactionDA_Test", () => {
       expect(mockFileService.readFile).not.toHaveBeenCalled();
     });
 
-    test("when accountID is undefined, test should return undefined", async () => {
+    test("when accountID is undefined, return undefined", async () => {
       const result = await transactionDA.getTransactionsByAccountID(
         undefined as any
       );
@@ -84,14 +86,14 @@ describe("TransactionDA_Test", () => {
       expect(mockFileService.readFile).not.toHaveBeenCalled();
     });
 
-    test("when there is no transaction for the accountID, test should return empty array", async () => {
+    test("when there is no transaction for the accountID, return empty array", async () => {
       const expected: Transaction[] = [];
       const result = await transactionDA.getTransactionsByAccountID("Account3");
       expect(result).toEqual(expected);
       expect(mockFileService.readFile).toHaveBeenCalledTimes(1);
     });
 
-    test("when accountID is found, test should return the transactions", async () => {
+    test("when accountID is found, return the transactions", async () => {
       const expectedMock = mockTransactions.filter(
         (t) => t.accountID === "Account1"
       );
@@ -102,7 +104,7 @@ describe("TransactionDA_Test", () => {
   });
 
   describe("addTransaction_test", () => {
-    test("when transaction is null, test should return error message", async () => {
+    test("when transaction is null, return error message", async () => {
       const result = await transactionDA.addTransaction(null as any);
       const mockError = new Error("Invalid transaction");
 
@@ -110,7 +112,7 @@ describe("TransactionDA_Test", () => {
       expect(mockFileService.writeFile).not.toHaveBeenCalled();
     });
 
-    test("when transaction accountID is empty, test should return error message", async () => {
+    test("when transaction accountID is empty, return error message", async () => {
       const newTransaction = { ...mockTransactions[0], accountID: "" };
       const result = await transactionDA.addTransaction(newTransaction);
       const mockError = new Error("Invalid transaction");
@@ -119,7 +121,7 @@ describe("TransactionDA_Test", () => {
       expect(mockFileService.writeFile).not.toHaveBeenCalled();
     });
 
-    test("when transaction amount is negative, test should return error message", async () => {
+    test("when transaction amount is negative, return error message", async () => {
       const newTransaction = { ...mockTransactions[0], amount: -100 };
       const result = await transactionDA.addTransaction(newTransaction);
       const mockError = new Error("Invalid transaction");
@@ -128,7 +130,7 @@ describe("TransactionDA_Test", () => {
       expect(mockFileService.writeFile).not.toHaveBeenCalled();
     });
 
-    test("when transaction is valid, test should return successful message", async () => {
+    test("when transaction is valid, return successful message", async () => {
       const newTransaction: Transaction = {
         accountID: "Account2",
         amount: 100,
@@ -149,7 +151,7 @@ describe("TransactionDA_Test", () => {
       );
     });
 
-    test("when transaction already exists, test should return error message", async () => {
+    test("when transaction already exists, return error message", async () => {
       const newTransaction = { ...mockTransactions[0] };
       const result = await transactionDA.addTransaction(newTransaction);
       const mockError = new Error("Transaction already exists");
@@ -158,7 +160,7 @@ describe("TransactionDA_Test", () => {
       expect(mockFileService.writeFile).not.toHaveBeenCalled();
     });
 
-    test("when file write fails, test should return false", async () => {
+    test("when file write fails, return false", async () => {
       const mockError = new Error("File write error");
       mockFileService.readFile.mockResolvedValue([...mockTransactions]);
       mockFileService.writeFile.mockRejectedValueOnce(mockError);

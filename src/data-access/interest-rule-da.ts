@@ -1,3 +1,5 @@
+import { FilePaths } from "@config/constants";
+
 import { InterestRule } from "@models/interest";
 import { Result } from "@models/result";
 
@@ -9,7 +11,7 @@ import {
 
 import { FileService } from "@infrastructure/file-service";
 
-const interestRuleFilePath = "@data/interest-rules.json";
+const interestRuleFilePath = FilePaths.INTEREST_RULES;
 
 export class InterestRuleDA {
   private fileService: FileService;
@@ -86,7 +88,7 @@ export class InterestRuleDA {
     try {
       const rulesToSave = interestRules.map((rule) => ({
         ...rule,
-        date: serializeDate(rule.date),
+        date: this.serializeDate(rule.date),
       }));
 
       await this.fileService.writeFile(interestRuleFilePath, rulesToSave);
@@ -96,8 +98,8 @@ export class InterestRuleDA {
       return createErrorResult(error);
     }
   }
-}
 
-function serializeDate(date: Date | string): string {
-  return date instanceof Date ? date.toISOString() : date;
+  private serializeDate(date: Date | string): string {
+    return date instanceof Date ? date.toISOString() : date;
+  }
 }

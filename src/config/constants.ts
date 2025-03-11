@@ -34,3 +34,9 @@ export const ValidationMessages = {
   INVALID_ACCOUNT_ID_LENGTH: "Account name must be less than 21 characters",
   INVALID_INTEREST_ID_LENGTH: "Interest rule id must be less than 21 characters",
 } as const;
+
+export const FilePaths = {
+  ACCOUNTS: "@data/accounts.json",
+  INTEREST_RULES: "@data/interest-rules.json",
+  TRANSACTIONS: "@data/transactions.json",
+} as const;

@@ -328,7 +328,7 @@ describe("TransactionService_Test", () => {
       expect(result).toEqual(createErrorResult("Invalid operation"));
     });
 
-    test("when there is no previous transactions, test should return success", async () => {
+    test("when there is no previous transactions, return success", async () => {
       const newTransaction = createTransaction(
         "20240320-01",
         new Date("2024-03-20"),

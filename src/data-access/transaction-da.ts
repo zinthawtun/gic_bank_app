@@ -1,3 +1,5 @@
+import { FilePaths } from "@config/constants";
+
 import { Result } from "@models/result";
 import { Transaction } from "@models/transaction";
 
@@ -9,7 +11,7 @@ import {
 
 import { FileService } from "@infrastructure/file-service";
 
-const transactionFilePath = "@data/transactions.json";
+const transactionFilePath = FilePaths.TRANSACTIONS;
 
 export class TransactionDA {
   private readonly fileService: FileService;

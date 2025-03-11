@@ -51,7 +51,7 @@ describe("InterestRuleService_Test", () => {
       expect(result).toEqual(createCustomErrorResult("Invalid interest rule"));
     });
 
-    test("when ruleID is empty, test should return error", async () => {
+    test("when ruleID is empty, return error", async () => {
       const result = await interestRuleService.createNewInterestRule({
         ruleID: "",
         date: new Date(),
@@ -61,7 +61,7 @@ describe("InterestRuleService_Test", () => {
       expect(result).toEqual(createCustomErrorResult("Invalid interest rule"));
     });
 
-    test("when date is empty, test should return error", async () => {
+    test("when date is empty, return error", async () => {
       const result = await interestRuleService.createNewInterestRule({
         ruleID: "rule1",
         date: undefined as any,
@@ -71,7 +71,7 @@ describe("InterestRuleService_Test", () => {
       expect(result).toEqual(createCustomErrorResult("Invalid interest rule"));
     });
 
-    test("when rate is less than 0, test should return error", async () => {
+    test("when rate is less than 0, return error", async () => {
       const result = await interestRuleService.createNewInterestRule({
         ruleID: "rule1",
         date: new Date(),
@@ -81,7 +81,7 @@ describe("InterestRuleService_Test", () => {
       expect(result).toEqual(createCustomErrorResult("Invalid interest rule"));
     });
 
-    test("when rate is greater than 100, test should return error", async () => {
+    test("when rate is greater than 100, return error", async () => {
       const result = await interestRuleService.createNewInterestRule({
         ruleID: "rule1",
         date: new Date(),
@@ -91,7 +91,7 @@ describe("InterestRuleService_Test", () => {
       expect(result).toEqual(createCustomErrorResult("Invalid interest rule"));
     });
 
-    test("when interest rule already exists, test should return error", async () => {
+    test("when interest rule already exists, return error", async () => {
       const rule = createInterestRule("rule1", new Date("2024-01-01"), 0.01);
       mockInterestRuleDA.getAllInterestRules.mockResolvedValue(
         mockInterestRules
