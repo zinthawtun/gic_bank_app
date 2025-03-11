@@ -1,3 +1,5 @@
+import { FilePaths } from "@/config/constants";
+
 import { AccountDA } from "@data-access/account-da";
 
 import { Account } from "@models/account";
@@ -7,6 +9,7 @@ import {
   createCustomErrorResult,
   createErrorResult,
 } from "@utilities/result-helper";
+import { createAccount } from "@test/scenario-helper";
 
 import { FileService } from "@infrastructure/file-service";
 
@@ -22,17 +25,10 @@ jest.mock("@infrastructure/file-service", () => ({
 
 describe("AccountDA_Test", () => {
   let accountDA: AccountDA;
-  const testFilePath = "@data/accounts.json";
+  const testFilePath = FilePaths.ACCOUNTS;
   const mockAccounts: Account[] = [
-    {
-      accountID: "Account1",
-
-      balance: 100,
-    },
-    {
-      accountID: "Account2",
-      balance: 50,
-    },
+    createAccount("Account1", 100),
+    createAccount("Account2", 50),
   ];
 
   beforeEach(() => {
@@ -48,28 +44,28 @@ describe("AccountDA_Test", () => {
   });
 
   describe("getAccountByID_test", () => {
-    test("when accountID is empty, test should return undefined", async () => {
+    test("when accountID is empty, return undefined", async () => {
       const result = await accountDA.getAccountByID("");
 
       expect(result).toBeUndefined();
       expect(mockFileService.readFile).not.toHaveBeenCalled();
     });
 
-    test("when accountID is null, test should return undefined", async () => {
+    test("when accountID is null, return undefined", async () => {
       const result = await accountDA.getAccountByID(null as any);
 
       expect(result).toBeUndefined();
       expect(mockFileService.readFile).not.toHaveBeenCalled();
     });
 
-    test("when accountID is valid, test should return the account", async () => {
+    test("when accountID is valid, return the account", async () => {
       const result = await accountDA.getAccountByID("Account1");
 
       expect(result).toEqual(mockAccounts[0]);
       expect(mockFileService.readFile).toHaveBeenCalledWith(testFilePath);
     });
 
-    test("when accountID is not found, test should return undefined", async () => {
+    test("when accountID is not found, return undefined", async () => {
       const result = await accountDA.getAccountByID("Account3");
 
       expect(result).toBeUndefined();
@@ -78,19 +74,19 @@ describe("AccountDA_Test", () => {
   });
 
   describe("createNewAccount_test", () => {
-    test("when account is empty, test should return custom error", async () => {
+    test("when account is empty, return custom error", async () => {
       const result = await accountDA.createNewAccount(undefined as any);
 
       expect(result).toEqual(createCustomErrorResult("Invalid operation"));
     });
 
-    test("when accountID is empty, test should return custom error", async () => {
+    test("when accountID is empty, return custom error", async () => {
       const result = await accountDA.createNewAccount({ accountID: "" } as any);
 
       expect(result).toEqual(createCustomErrorResult("Invalid operation"));
     });
 
-    test("when balance is undefined, test should return custom error", async () => {
+    test("when balance is undefined, return custom error", async () => {
       const result = await accountDA.createNewAccount({
         accountID: "Account3",
       } as any);
@@ -98,7 +94,7 @@ describe("AccountDA_Test", () => {
       expect(result).toEqual(createCustomErrorResult("Invalid operation"));
     });
 
-    test("when balance is negative, test should return custom error", async () => {
+    test("when balance is negative, return custom error", async () => {
       const result = await accountDA.createNewAccount({
         accountID: "Account3",
         balance: -10,
@@ -107,7 +103,7 @@ describe("AccountDA_Test", () => {
       expect(result).toEqual(createCustomErrorResult("Invalid operation"));
     });
 
-    test("when account already exists, test should return custom error", async () => {
+    test("when account already exists, return custom error", async () => {
       const result = await accountDA.createNewAccount({
         accountID: "Account1",
         balance: 100,
@@ -128,7 +124,7 @@ describe("AccountDA_Test", () => {
       );
     });
 
-    test("when save account fails, test should return error result", async () => {
+    test("when save account fails, return error result", async () => {
       const account: Account = { accountID: "Account5", balance: 100 };
       mockFileService.writeFile.mockRejectedValue("error");
       const result = await accountDA.createNewAccount(account);
@@ -138,19 +134,19 @@ describe("AccountDA_Test", () => {
   });
 
   describe("updateAccount_test", () => {
-    test("when account is empty, test should return error", async () => {
+    test("when account is empty, return error", async () => {
       const result = await accountDA.updateAccount(undefined as any);
 
       expect(result).toEqual(createCustomErrorResult("Invalid operation"));
     });
 
-    test("when accountID is empty, test should return error", async () => {
+    test("when accountID is empty, return error", async () => {
       const result = await accountDA.updateAccount({ accountID: "" } as any);
 
       expect(result).toEqual(createCustomErrorResult("Invalid operation"));
     });
 
-    test("when balance is undefined, test should return error", async () => {
+    test("when balance is undefined, return error", async () => {
       const result = await accountDA.updateAccount({
         accountID: "Account3",
       } as any);
@@ -158,7 +154,7 @@ describe("AccountDA_Test", () => {
       expect(result).toEqual(createCustomErrorResult("Invalid operation"));
     });
 
-    test("when balance is negative, test should return error", async () => {
+    test("when balance is negative, return error", async () => {
       const result = await accountDA.updateAccount({
         accountID: "Account3",
         balance: -10,
@@ -167,7 +163,7 @@ describe("AccountDA_Test", () => {
       expect(result).toEqual(createCustomErrorResult("Invalid operation"));
     });
 
-    test("when account is not found, test should return error", async () => {
+    test("when account is not found, return error", async () => {
       const result = await accountDA.updateAccount({
         accountID: "Account3",
         balance: 100,

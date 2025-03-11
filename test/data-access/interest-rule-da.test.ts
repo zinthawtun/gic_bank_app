@@ -1,3 +1,5 @@
+import { FilePaths } from "@/config/constants";
+
 import { InterestRuleDA } from "@data-access/interest-rule-da";
 
 import { InterestRule } from "@models/interest";
@@ -9,6 +11,7 @@ import {
   createCustomErrorResult,
   createErrorResult,
 } from "@utilities/result-helper";
+import { createInterestRule } from "@test/scenario-helper";
 
 const mockFileService = {
   readFile: jest.fn(),
@@ -22,18 +25,10 @@ jest.mock("@infrastructure/file-service", () => ({
 
 describe("InterestRuleDA_Test", () => {
   let interestRuleDA: InterestRuleDA;
-  const testFilePath = "@data/interest-rules.json";
+  const testFilePath = FilePaths.INTEREST_RULES;
   const mockInterestRules: InterestRule[] = [
-    {
-      ruleID: "rule1",
-      date: new Date("2024-01-01"),
-      rate: 0.01,
-    },
-    {
-      ruleID: "rule2",
-      date: new Date("2024-01-02"),
-      rate: 0.02,
-    },
+    createInterestRule("rule1", new Date("2024-01-01"), 0.01),
+    createInterestRule("rule2", new Date("2024-01-02"), 0.02),
   ];
 
   beforeEach(() => {
@@ -49,7 +44,7 @@ describe("InterestRuleDA_Test", () => {
   });
 
   describe("createNewInterestRule_test", () => {
-    test("when interest rule is empty, test should return error", async () => {
+    test("when interest rule is empty, return error", async () => {
       const result = await interestRuleDA.insertNewInterestRule(
         undefined as any
       );
@@ -57,7 +52,7 @@ describe("InterestRuleDA_Test", () => {
       expect(result).toEqual(createCustomErrorResult("Invalid interest rule"));
     });
 
-    test("when ruleID is empty, test should return error", async () => {
+    test("when ruleID is empty, return error", async () => {
       const result = await interestRuleDA.insertNewInterestRule({
         ruleID: "",
       } as any);
@@ -65,7 +60,7 @@ describe("InterestRuleDA_Test", () => {
       expect(result).toEqual(createCustomErrorResult("Invalid interest rule"));
     });
 
-    test("when rate is undefined, test should return error", async () => {
+    test("when rate is undefined, return error", async () => {
       const result = await interestRuleDA.insertNewInterestRule({
         ruleID: "rule1",
       } as any);
@@ -73,16 +68,15 @@ describe("InterestRuleDA_Test", () => {
       expect(result).toEqual(createCustomErrorResult("Invalid interest rule"));
     });
 
-    test("when rate is negative, test should return error", async () => {
-      const result = await interestRuleDA.insertNewInterestRule({
-        ruleID: "rule1",
-        rate: -0.01,
-      } as any);
+    test("when rate is negative, return error", async () => {
+      const result = await interestRuleDA.insertNewInterestRule(
+        createInterestRule("rule1", new Date("2024-01-01"), -0.01)
+      );
 
       expect(result).toEqual(createCustomErrorResult("Invalid interest rule"));
     });
 
-    test("when interest rule date is empty, test should return error", async () => {
+    test("when interest rule date is empty, return error", async () => {
       const result = await interestRuleDA.insertNewInterestRule({
         ruleID: "rule1",
         rate: 0.01,
@@ -92,29 +86,27 @@ describe("InterestRuleDA_Test", () => {
       expect(result).toEqual(createCustomErrorResult("Invalid interest rule"));
     });
 
-    test("when interest rule already exists, test should return error", async () => {
+    test("when interest rule already exists, return error", async () => {
       mockFileService.readFile.mockResolvedValue([
         ...mockInterestRules,
-        { ruleID: "rule1", rate: 0.01, date: new Date("2024-01-01") },
+        createInterestRule("rule1", new Date("2024-01-01"), 0.01),
       ]);
 
-      const result = await interestRuleDA.insertNewInterestRule({
-        ruleID: "rule1",
-        rate: 0.01,
-        date: new Date("2024-01-01"),
-      } as InterestRule);
+      const result = await interestRuleDA.insertNewInterestRule(
+        createInterestRule("rule1", new Date("2024-01-01"), 0.01)
+      );
 
       expect(result).toEqual(
         createCustomErrorResult("Interest rule already exists")
       );
     });
 
-    test("when interest rule is valid, test should return successful result", async () => {
-      const newInterestRule: InterestRule = {
-        ruleID: "rule4",
-        rate: 0.03,
-        date: new Date("2024-01-03"),
-      };
+    test("when interest rule is valid, return successful result", async () => {
+      const newInterestRule: InterestRule = createInterestRule(
+        "rule4",
+        new Date("2024-01-03"),
+        0.03
+      );
       const updatedInterestRules = [...mockInterestRules, newInterestRule];
       const updatedRules = updatedInterestRules.map((rule) => ({
         ...rule,
@@ -134,21 +126,19 @@ describe("InterestRuleDA_Test", () => {
       );
     });
 
-    test("when saving new interest rule fails, test should return error", async () => {
+    test("when saving new interest rule fails, return error", async () => {
       mockFileService.writeFile.mockRejectedValue("error");
 
-      const result = await interestRuleDA.insertNewInterestRule({
-        ruleID: "rule7",
-        rate: 0.03,
-        date: new Date("2024-01-09"),
-      });
+      const result = await interestRuleDA.insertNewInterestRule(
+        createInterestRule("rule7", new Date("2024-01-09"), 0.03)
+      );
 
       expect(result).toEqual(createErrorResult("error"));
     });
   });
 
   describe("replaceInterestRateByDate_test", () => {
-    test("when oldRule is undefined, test should return error", async () => {
+    test("when oldRule is undefined, return error", async () => {
       const result = await interestRuleDA.replaceInterestRule(
         undefined as any,
         mockInterestRules[0],
@@ -158,7 +148,7 @@ describe("InterestRuleDA_Test", () => {
       expect(result).toEqual(createCustomErrorResult("Invalid operation"));
     });
 
-    test("when newRule is undefined, test should return error", async () => {
+    test("when newRule is undefined, return error", async () => {
       const result = await interestRuleDA.replaceInterestRule(
         mockInterestRules[0],
         undefined as any,
@@ -168,7 +158,7 @@ describe("InterestRuleDA_Test", () => {
       expect(result).toEqual(createCustomErrorResult("Invalid operation"));
     });
 
-    test("when rules is undefined, test should return error", async () => {
+    test("when rules is undefined, return error", async () => {
       const result = await interestRuleDA.replaceInterestRule(
         mockInterestRules[0],
         mockInterestRules[1],
@@ -178,7 +168,7 @@ describe("InterestRuleDA_Test", () => {
       expect(result).toEqual(createCustomErrorResult("Invalid operation"));
     });
 
-    test("when rules is empty, test should return error", async () => {
+    test("when rules is empty, return error", async () => {
       const result = await interestRuleDA.replaceInterestRule(
         mockInterestRules[0],
         mockInterestRules[1],
@@ -190,10 +180,10 @@ describe("InterestRuleDA_Test", () => {
       );
     });
 
-    test("when oldRule is not found, test should return  error", async () => {
+    test("when oldRule is not found, return error", async () => {
       const result = await interestRuleDA.replaceInterestRule(
-        { ruleID: "rule3", rate: 0.03, date: new Date("2024-01-03") },
-        { ruleID: "rule3", rate: 0.03, date: new Date("2024-01-03") },
+        createInterestRule("rule3", new Date("2024-01-03"), 0.03),
+        createInterestRule("rule3", new Date("2024-01-03"), 0.03),
         mockInterestRules
       );
 
@@ -202,10 +192,10 @@ describe("InterestRuleDA_Test", () => {
       );
     });
 
-    test("when replacing interest rule is successful, test should return successful result", async () => {
+    test("when replacing interest rule is successful, return successful result", async () => {
       const result = await interestRuleDA.replaceInterestRule(
         mockInterestRules[0],
-        { ruleID: "rule3", rate: 0.03, date: new Date("2024-01-03") },
+        createInterestRule("rule3", new Date("2024-01-03"), 0.03),
         mockInterestRules
       );
 
@@ -214,7 +204,7 @@ describe("InterestRuleDA_Test", () => {
   });
 
   describe("getInterestAllInterestRules_test", () => {
-    test("when there is no interest rules, test should return empty array", async () => {
+    test("when there is no interest rules, return empty array", async () => {
       mockFileService.readFile.mockResolvedValue([]);
 
       const result = await interestRuleDA.getAllInterestRules();
@@ -223,7 +213,7 @@ describe("InterestRuleDA_Test", () => {
       expect(mockFileService.readFile).toHaveBeenCalledWith(testFilePath);
     });
 
-    test("when there are interest rules, test should return the interest rules", async () => {
+    test("when there are interest rules, return the interest rules", async () => {
       const result = await interestRuleDA.getAllInterestRules();
 
       expect(result).toEqual(mockInterestRules);
@@ -232,7 +222,7 @@ describe("InterestRuleDA_Test", () => {
   });
 
   describe("saveInterestRules", () => {
-    test("when saving rules with Date objects, should convert dates to ISO strings", async () => {
+    test("when saving rules with Date objects, convert and save to ISO strings", async () => {
       const dateObj = new Date("2024-03-20T00:00:00.000Z");
       const rules: InterestRule[] = [
         {
@@ -260,7 +250,7 @@ describe("InterestRuleDA_Test", () => {
       );
     });
 
-    test("when saving rules with ISO string dates, should preserve the ISO strings", async () => {
+    test("when saving rules with ISO string dates, save the ISO strings", async () => {
       const isoString = "2024-03-20T00:00:00.000Z";
       const rules: InterestRule[] = [
         {
