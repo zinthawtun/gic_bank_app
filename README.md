@@ -12,10 +12,10 @@
 #### TSC Version - Version 5.7.2
 
 ## Additional rules and validation checks added
-#### 1. Account Name or RuleID is limited to 20.
-#### 2. Transactions should be going forward starting from the first transaction. Injecting with past date is not allowed.
-#### 3. Interest rule can be overwritten with different rule-id and rate on the same date. Same rule id cannot be reused for different date.
-#### 4. Transaction limit is 1,000,000 per transaction.
+#### 1. AccountName or RuleID is limited to 20 characters.
+#### 2. Transaction dates should be going forward starting from the first transaction. Injecting with past date is not allowed.
+#### 3. Interest rule can be overwritten with a different rule-id and rate on the same date. Same rule id cannot be reused for different date.
+#### 4. Transaction amount limit is 1,000,000 per transaction.
 
 ## Tests Coverage
 
